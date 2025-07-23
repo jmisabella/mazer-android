@@ -1,3 +1,9 @@
+
+mazer/
+mazer.h
+app/src/main/jniLibs/x86_64/libmazer.so
+app/src/main/jniLibs/arm64-v8a/libmazer.so
+
 # Gradle files
 .gradle/
 build/
