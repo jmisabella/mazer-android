@@ -8,6 +8,8 @@ android {
     namespace = "com.jmisabella.mazeq"
     compileSdk = 36
 
+    ndkVersion = "29.0.13599879"
+
     defaultConfig {
         applicationId = "com.jmisabella.mazeq"
         minSdk = 24

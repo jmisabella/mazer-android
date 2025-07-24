@@ -37,7 +37,7 @@ Android app using the `mazer` Rust library for generating and solving mazes.
            defaultConfig {
                ...
                ndk {
-                   abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86_64")
+		   abiFilters += listOf("x86_64", "arm64-v8a")  // For DEVELOP/emulator; use listOf("armeabi-v7a", "arm64-v8a") for RELEASE
                }
            }
            externalNativeBuild {
@@ -47,8 +47,7 @@ Android app using the `mazer` Rust library for generating and solving mazes.
            }
        }
        ```
-    4. Sync the project (click **Sync Project with Gradle Files**).
-
+    4. Sync the project (click **Sync Project with Gradle Files**—the elephant icon in the toolbar).
 4. **Set Up JNI Integration**
     1. In Android Studio, create a Kotlin file (e.g., `MazerNative.kt`) in `app/src/main/kotlin/com/yourname/mazerandroid/` to define native methods:
        ```kotlin
@@ -56,13 +55,13 @@ Android app using the `mazer` Rust library for generating and solving mazes.
 
        object MazerNative {
            init {
-               System.loadLibrary("mazer")
+               System.loadLibrary("mazer_jni")  // Loads the JNI wrapper, which links to libmazer
            }
 
            external fun mazerFfiIntegrationTest(): Int
        }
        ```
-    2. Copy `mazer.h` from the project root to `app/src/main/cpp/` for reference when writing JNI bindings.
+    2. Copy `mazer.h` from the project root to `app/src/main/cpp/mazer.h` for reference when writing JNI bindings. 
     3. Create a JNI wrapper in `app/src/main/cpp/mazer_jni.c`:
        ```c
        #include <jni.h>
@@ -80,8 +79,7 @@ Android app using the `mazer` Rust library for generating and solving mazes.
 
        add_library(mazer SHARED IMPORTED)
        set_target_properties(mazer PROPERTIES IMPORTED_LOCATION
-           "${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libmazer.so")
-
+           "${CMAKE_SOURCE_DIR}/../jniLibs/${ANDROID_ABI}/libmazer.so")
        add_library(mazer_jni SHARED mazer_jni.c)
        target_link_libraries(mazer_jni mazer)
        ```
@@ -114,7 +112,7 @@ Android app using the `mazer` Rust library for generating and solving mazes.
        }
        ```
     2. Run the app on an emulator or device.
-    3. Verify the UI displays "FFI Test Result: 42" and check Logcat for:
+    3. Verify the UI displays "FFI Test Result: 42" and check Logcat for any related output (e.g., if the Rust function logs "FFI integration test passed ✅").
        ```
        FFI integration test passed ✅
        ```
