@@ -137,7 +137,9 @@ fun MazeRequestScreen(
                                 contentColor = if (isSelected) (if (isDark) Color.Black else Color.White) else tint
                             ),
                             border = BorderStroke(1.dp, tint),
-                            shape = MaterialTheme.shapes.small
+                            shape = MaterialTheme.shapes.small,
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier.weight(1f)
                         ) {
                             Text(size.label)
                         }
@@ -161,9 +163,11 @@ fun MazeRequestScreen(
                             contentColor = if (isSelected) (if (isDark) Color.Black else Color.White) else tint
                         ),
                         border = BorderStroke(1.dp, tint),
-                        shape = MaterialTheme.shapes.small
+                        shape = MaterialTheme.shapes.small,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text(type.name.replaceFirstChar { it.uppercase() })
+                        Text(type.displayName)
                     }
                 }
             }

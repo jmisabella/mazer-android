@@ -1,5 +1,18 @@
 package com.jmisabella.mazeq.models
 
+import com.jmisabella.mazeq.models.MazeAlgorithm.ALDOUS_BRODER
+import com.jmisabella.mazeq.models.MazeAlgorithm.BINARY_TREE
+import com.jmisabella.mazeq.models.MazeAlgorithm.ELLERS
+import com.jmisabella.mazeq.models.MazeAlgorithm.GROWING_TREE_NEWEST
+import com.jmisabella.mazeq.models.MazeAlgorithm.GROWING_TREE_RANDOM
+import com.jmisabella.mazeq.models.MazeAlgorithm.HUNT_AND_KILL
+import com.jmisabella.mazeq.models.MazeAlgorithm.KRUSKALS
+import com.jmisabella.mazeq.models.MazeAlgorithm.PRIMS
+import com.jmisabella.mazeq.models.MazeAlgorithm.RECURSIVE_BACKTRACKER
+import com.jmisabella.mazeq.models.MazeAlgorithm.RECURSIVE_DIVISION
+import com.jmisabella.mazeq.models.MazeAlgorithm.REVERSE_DELETE
+import com.jmisabella.mazeq.models.MazeAlgorithm.SIDEWINDER
+import com.jmisabella.mazeq.models.MazeAlgorithm.WILSONS
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -23,6 +36,15 @@ enum class MazeType {
         get() = when (this) {
             DELTA -> "Delta"
             ORTHOGONAL -> "Orthogonal"
+            RHOMBIC -> "Rhombic"
+            SIGMA -> "Sigma"
+            UPSILON -> "Upsilon"
+        }
+
+    val displayName: String
+        get() = when (this) {
+            DELTA -> "Delta"
+            ORTHOGONAL -> "Ortho"
             RHOMBIC -> "Rhombic"
             SIGMA -> "Sigma"
             UPSILON -> "Upsilon"
