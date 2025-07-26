@@ -52,6 +52,7 @@ fun MazeRequestScreen(
     val isDark = isSystemInDarkTheme()
     val fontScale = if (screenWidth > 700) 1.3f else 1.0f
     val isTablet = (configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE
+
     val availableMazeTypes = remember { MazeType.availableMazeTypes(isSmallScreen = screenHeight <= 667f) }
     var availableAlgorithms by remember(selectedMazeType.value) { mutableStateOf(MazeAlgorithm.availableAlgorithms(selectedMazeType.value)) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -211,7 +212,9 @@ fun MazeRequestScreen(
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(if (isDark) Color.DarkGray else CellColors.offWhite) // Match theme background
+                    modifier = Modifier
+                        .background(if (isDark) Color.DarkGray else CellColors.offWhite) // Match theme background
+                        .verticalScroll(rememberScrollState()) // scrollable
                 ) {
                     availableAlgorithms.forEach { algo ->
                         DropdownMenuItem(
