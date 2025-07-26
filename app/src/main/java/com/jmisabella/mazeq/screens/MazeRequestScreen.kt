@@ -175,7 +175,7 @@ fun MazeRequestScreen(
             Text(
                 text = selectedMazeType.value.description,
                 fontSize = (12 * fontScale).sp,
-                color = if (isDark) MaterialTheme.colorScheme.secondary else CellColors.lightModeSecondary,
+                color = if (isDark) CellColors.grayerSky else CellColors.lightModeSecondary,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(20.dp))
@@ -190,36 +190,60 @@ fun MazeRequestScreen(
                     readOnly = true,
                     value = selectedAlgorithm.value.displayName,
                     onValueChange = { },
-                    label = { Text("Algorithm") },
+                    label = null, // Remove label to only show selected value
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                    modifier = Modifier.menuAnchor()
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(
+                        focusedLabelColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        unfocusedLabelColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        focusedIndicatorColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        unfocusedIndicatorColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        focusedTrailingIconColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        unfocusedTrailingIconColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        focusedContainerColor = if (isDark) Color.Black else CellColors.offWhite, // Match cream background
+                        unfocusedContainerColor = if (isDark) Color.Black else CellColors.offWhite, // Match cream background
+                        disabledContainerColor = if (isDark) Color.Black else CellColors.offWhite,
+                        focusedTextColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        unfocusedTextColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed
+                    ),
+//                    textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold), // Bold for better legibility
+                    modifier = Modifier.menuAnchor(),
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(if (isDark) Color.DarkGray else CellColors.offWhite) // Match theme background
                 ) {
                     availableAlgorithms.forEach { algo ->
                         DropdownMenuItem(
-                            text = { Text(algo.displayName, fontSize = (16 * fontScale).sp, fontWeight = FontWeight.Bold) },
+                            text = {
+                                Text(
+                                    algo.displayName,
+                                    fontSize = (16 * fontScale).sp,
+//                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDark) Color.White else CellColors.orangeRed // Match accent color
+                                )
+                            },
                             onClick = {
                                 selectedAlgorithm.value = algo
                                 expanded = false
-                            }
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                         )
                     }
                 }
             }
+
             Spacer(Modifier.height(4.dp))
             Text(
                 text = selectedAlgorithm.value.description,
                 fontSize = (12 * fontScale).sp,
-                color = if (isDark) MaterialTheme.colorScheme.secondary else CellColors.lightModeSecondary,
+                color = if (isDark) CellColors.grayerSky else CellColors.lightModeSecondary,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(20.dp))
 
             if (!isTablet) {
+                // Show Maze Generation Toggle - Light mode tweaks
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
@@ -235,7 +259,10 @@ fun MazeRequestScreen(
                         onCheckedChange = { captureSteps.value = it },
                         enabled = selectedSize.value == CellSize.LARGE,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed
+                            checkedThumbColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                            checkedTrackColor = if (isDark) CellColors.lightSkyBlue.copy(alpha = 0.5f) else CellColors.orangeRed.copy(alpha = 0.5f),
+                            uncheckedThumbColor = if (isDark) Color.Gray else CellColors.offWhite, // Cream for disabled thumb to blend
+                            uncheckedTrackColor = if (isDark) Color.LightGray else CellColors.orangeRed.copy(alpha = 0.2f) // Light orange tint for track
                         )
                     )
                 }
