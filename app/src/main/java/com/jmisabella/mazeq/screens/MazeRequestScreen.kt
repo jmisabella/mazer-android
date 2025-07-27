@@ -191,7 +191,7 @@ fun MazeRequestScreen(
                     readOnly = true,
                     value = selectedAlgorithm.value.displayName,
                     onValueChange = { },
-                    label = null, // Remove label to only show selected value
+                    label = null,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     colors = ExposedDropdownMenuDefaults.textFieldColors(
                         focusedLabelColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
@@ -200,38 +200,89 @@ fun MazeRequestScreen(
                         unfocusedIndicatorColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
                         focusedTrailingIconColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
                         unfocusedTrailingIconColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
-                        focusedContainerColor = if (isDark) Color.Black else CellColors.offWhite, // Match cream background
-                        unfocusedContainerColor = if (isDark) Color.Black else CellColors.offWhite, // Match cream background
+                        focusedContainerColor = if (isDark) Color.Black else CellColors.offWhite,
+                        unfocusedContainerColor = if (isDark) Color.Black else CellColors.offWhite,
                         disabledContainerColor = if (isDark) Color.Black else CellColors.offWhite,
                         focusedTextColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
                         unfocusedTextColor = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed
                     ),
-//                    textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold), // Bold for better legibility
-                    modifier = Modifier.menuAnchor(),
+                    textStyle = LocalTextStyle.current.copy(
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     modifier = Modifier
-                        .background(if (isDark) Color.DarkGray else CellColors.offWhite) // Match theme background
-                        .verticalScroll(rememberScrollState()) // scrollable
+                        .background(if (isDark) Color.DarkGray else CellColors.offWhite)
                 ) {
-                    availableAlgorithms.forEach { algo ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    algo.displayName,
-                                    fontSize = (16 * fontScale).sp,
-//                                    fontWeight = FontWeight.Bold,
-                                    color = if (isDark) Color.White else CellColors.orangeRed // Match accent color
+                    val scrollState = rememberScrollState()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 300.dp)
+                                .verticalScroll(scrollState)
+                        ) {
+                            availableAlgorithms.forEach { algo ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            algo.displayName,
+                                            fontSize = (16 * fontScale).sp,
+                                            color = if (isDark) Color.White else CellColors.orangeRed
+                                        )
+                                    },
+                                    onClick = {
+                                        selectedAlgorithm.value = algo
+                                        expanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                                 )
-                            },
-                            onClick = {
-                                selectedAlgorithm.value = algo
-                                expanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
-                        )
+                            }
+                        }
+                        // Scroll indicators (no need for 'if (expanded)' here, as this is inside the menu)
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .fillMaxWidth()
+                        ) {
+                            if (scrollState.value > 0) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_arrow_up),
+                                    contentDescription = "Scroll up",
+                                    tint = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                        .background(if (isDark) Color.DarkGray else CellColors.offWhite)
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                        ) {
+                            if (scrollState.value < scrollState.maxValue) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_arrow_down),
+                                    contentDescription = "Scroll down",
+                                    tint = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                        .background(if (isDark) Color.DarkGray else CellColors.offWhite)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -254,7 +305,9 @@ fun MazeRequestScreen(
                     Text(
                         text = "Show Maze Generation",
                         fontSize = (16 * fontScale).sp,
-                        color = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed
+                        color = if (isDark) CellColors.lightSkyBlue else CellColors.orangeRed,
+                        textAlign = TextAlign.Center, // Center the text horizontally
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.width(10.dp))
                     Switch(
