@@ -218,7 +218,7 @@ fun MazeRequestScreen(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     modifier = Modifier
-                        .background(if (isDark) Color.DarkGray else CellColors.offWhite)
+                        .background(if (isDark) Color.DarkGray else CellColors.barelyLavenderMostlyWhite)
                 ) {
                     val scrollState = rememberScrollState()
                     Box(
@@ -237,7 +237,7 @@ fun MazeRequestScreen(
                                         Text(
                                             algo.displayName,
                                             fontSize = (16 * fontScale).sp,
-                                            color = if (isDark) Color.White else CellColors.orangeRed
+                                            color = if (isDark) Color.White else CellColors.lightModeSecondary
                                         )
                                     },
                                     onClick = {
@@ -261,7 +261,7 @@ fun MazeRequestScreen(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .align(Alignment.CenterHorizontally)
-                                        .background(if (isDark) Color.DarkGray else CellColors.offWhite)
+                                        .background(if (isDark) Color.DarkGray else CellColors.barelyLavenderMostlyWhite)
                                 )
                             }
                         }
@@ -278,7 +278,7 @@ fun MazeRequestScreen(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .align(Alignment.CenterHorizontally)
-                                        .background(if (isDark) Color.DarkGray else CellColors.offWhite)
+                                        .background(if (isDark) Color.DarkGray else CellColors.barelyLavenderMostlyWhite)
                                 )
                             }
                         }
@@ -697,13 +697,14 @@ fun MazeRequestScreen(
 //            Button(
 //                onClick = submitMazeRequest,
 //                colors = ButtonDefaults.buttonColors(containerColor = buttonTint),
-//                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp),
+//                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
 //                modifier = Modifier.padding(16.dp)
 //            ) {
 //                Text(
 //                    "Generate",
 //                    color = if (isDark) Color.Black else Color.White,
-//                    fontWeight = FontWeight.Bold
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 18.sp
 //                )
 //            }
 //
