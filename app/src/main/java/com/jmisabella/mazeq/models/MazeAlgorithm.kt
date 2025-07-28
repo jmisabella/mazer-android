@@ -52,6 +52,23 @@ enum class MazeAlgorithm {
             WILSONS -> "Wilson's"
         }
 
+    val ffiName: String
+        get() = when (this) {
+            ALDOUS_BRODER -> "AldousBroder"
+            BINARY_TREE -> "BinaryTree"
+            ELLERS -> "Ellers"
+            GROWING_TREE_NEWEST -> "GrowingTreeNewest"
+            GROWING_TREE_RANDOM -> "GrowingTreeRandom"
+            HUNT_AND_KILL -> "HuntAndKill"
+            KRUSKALS -> "Kruskals"
+            PRIMS -> "Prims"
+            RECURSIVE_BACKTRACKER -> "RecursiveBacktracker"
+            RECURSIVE_DIVISION -> "RecursiveDivision"
+            REVERSE_DELETE -> "ReverseDelete"
+            SIDEWINDER -> "Sidewinder"
+            WILSONS -> "Wilsons"
+        }
+
     companion object {
         fun availableAlgorithms(mazeType: MazeType): List<MazeAlgorithm> = when (mazeType) {
             MazeType.ORTHOGONAL -> enumValues<MazeAlgorithm>().toList()
