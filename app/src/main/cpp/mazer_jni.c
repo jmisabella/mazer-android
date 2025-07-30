@@ -4,14 +4,15 @@
 
 // Helper to create Java FFICell object from C struct
 jobject createJavaFFICell(JNIEnv *env, const FFICell *cCell) {
-    jclass ffiCellClass = (*env)->FindClass(env, "com/jmisabella/mazeq/FFICell");
+    jclass ffiCellClass = (*env)->FindClass(env, "com/jmisabella/mazer/FFICell");
     if (ffiCellClass == NULL) return NULL;
 
+    // Corrected signature: Added the 6th 'Z' after 'I' (for the 6 booleans)
     jmethodID constructor = (*env)->GetMethodID(env, ffiCellClass, "<init>",
-                                                "(JJLjava/lang/String;[Ljava/lang/String;IZZZZZLjava/lang/String;Z)V");
+                                                "(JJLjava/lang/String;[Ljava/lang/String;IZZZZZZLjava/lang/String;Z)V");
     if (constructor == NULL) return NULL;
 
-    // Convert linked array to Java String array
+    // Convert linked array to Java String array (unchanged)
     jobjectArray linkedArray = (*env)->NewObjectArray(env, cCell->linked_len, (*env)->FindClass(env, "java/lang/String"), NULL);
     for (size_t i = 0; i < cCell->linked_len; i++) {
         jstring linkedStr = (*env)->NewStringUTF(env, cCell->linked[i]);
@@ -19,9 +20,10 @@ jobject createJavaFFICell(JNIEnv *env, const FFICell *cCell) {
         (*env)->DeleteLocalRef(env, linkedStr);
     }
 
-    jstring mazeTypeStr = (*env)->NewStringUTF(env, cCell->maze_type);
-    jstring orientationStr = (*env)->NewStringUTF(env, cCell->orientation);
+    jstring mazeTypeStr = cCell->maze_type ? (*env)->NewStringUTF(env, cCell->maze_type) : NULL;
+    jstring orientationStr = cCell->orientation ? (*env)->NewStringUTF(env, cCell->orientation) : NULL;
 
+    // NewObject call remains unchanged (no linked_len, but all 6 booleans are here)
     jobject javaCell = (*env)->NewObject(env, ffiCellClass, constructor,
                                          (jlong)cCell->x, (jlong)cCell->y,
                                          mazeTypeStr, linkedArray,
@@ -43,13 +45,13 @@ jobject createJavaFFICell(JNIEnv *env, const FFICell *cCell) {
 }
 
 JNIEXPORT jint JNICALL
-Java_com_jmisabella_mazeq_MazerNative_mazerFfiIntegrationTest(JNIEnv *env, jclass cls) {
+Java_com_jmisabella_mazer_MazerNative_mazerFfiIntegrationTest(JNIEnv *env, jclass cls) {
     return mazer_ffi_integration_test();
 }
 
 // Generate maze
 JNIEXPORT jlong JNICALL
-Java_com_jmisabella_mazeq_MazerNative_generateMaze(JNIEnv *env, jclass cls, jstring requestJson) {
+Java_com_jmisabella_mazer_MazerNative_generateMaze(JNIEnv *env, jclass cls, jstring requestJson) {
     const char *json = (*env)->GetStringUTFChars(env, requestJson, NULL);
     Grid *grid = mazer_generate_maze(json);
     (*env)->ReleaseStringUTFChars(env, requestJson, json);
@@ -58,18 +60,18 @@ Java_com_jmisabella_mazeq_MazerNative_generateMaze(JNIEnv *env, jclass cls, jstr
 
 // Destroy maze
 JNIEXPORT void JNICALL
-Java_com_jmisabella_mazeq_MazerNative_destroyMaze(JNIEnv *env, jclass cls, jlong gridPtr) {
+Java_com_jmisabella_mazer_MazerNative_destroyMaze(JNIEnv *env, jclass cls, jlong gridPtr) {
     mazer_destroy((Grid *)gridPtr);
 }
 
 // Get cells
 JNIEXPORT jobjectArray JNICALL
-Java_com_jmisabella_mazeq_MazerNative_getCells(JNIEnv *env, jclass cls, jlong gridPtr) {
+Java_com_jmisabella_mazer_MazerNative_getCells(JNIEnv *env, jclass cls, jlong gridPtr) {
     size_t length = 0;
     FFICell *cCells = mazer_get_cells((Grid *)gridPtr, &length);
     if (cCells == NULL) return NULL;
 
-    jclass ffiCellClass = (*env)->FindClass(env, "com/jmisabella/mazeq/FFICell");
+    jclass ffiCellClass = (*env)->FindClass(env, "com/jmisabella/mazer/FFICell");
     jobjectArray javaCells = (*env)->NewObjectArray(env, length, ffiCellClass, NULL);
 
     for (size_t i = 0; i < length; i++) {
@@ -84,18 +86,18 @@ Java_com_jmisabella_mazeq_MazerNative_getCells(JNIEnv *env, jclass cls, jlong gr
 
 // Get generation steps count
 JNIEXPORT jlong JNICALL
-Java_com_jmisabella_mazeq_MazerNative_getGenerationStepsCount(JNIEnv *env, jclass cls, jlong gridPtr) {
+Java_com_jmisabella_mazer_MazerNative_getGenerationStepsCount(JNIEnv *env, jclass cls, jlong gridPtr) {
     return (jlong)mazer_get_generation_steps_count((Grid *)gridPtr);
 }
 
 // Get generation step cells
 JNIEXPORT jobjectArray JNICALL
-Java_com_jmisabella_mazeq_MazerNative_getGenerationStepCells(JNIEnv *env, jclass cls, jlong gridPtr, jlong stepIndex) {
+Java_com_jmisabella_mazer_MazerNative_getGenerationStepCells(JNIEnv *env, jclass cls, jlong gridPtr, jlong stepIndex) {
     size_t length = 0;
     FFICell *cCells = mazer_get_generation_step_cells((Grid *)gridPtr, (size_t)stepIndex, &length);
     if (cCells == NULL) return NULL;
 
-    jclass ffiCellClass = (*env)->FindClass(env, "com/jmisabella/mazeq/FFICell");
+    jclass ffiCellClass = (*env)->FindClass(env, "com/jmisabella/mazer/FFICell");
     jobjectArray javaCells = (*env)->NewObjectArray(env, length, ffiCellClass, NULL);
 
     for (size_t i = 0; i < length; i++) {
@@ -110,7 +112,7 @@ Java_com_jmisabella_mazeq_MazerNative_getGenerationStepCells(JNIEnv *env, jclass
 
 // Make move
 JNIEXPORT jlong JNICALL
-Java_com_jmisabella_mazeq_MazerNative_makeMove(JNIEnv *env, jclass cls, jlong gridPtr, jstring direction) {
+Java_com_jmisabella_mazer_MazerNative_makeMove(JNIEnv *env, jclass cls, jlong gridPtr, jstring direction) {
     const char *dir = (*env)->GetStringUTFChars(env, direction, NULL);
     void *updatedGrid = mazer_make_move((void *)gridPtr, dir);
     (*env)->ReleaseStringUTFChars(env, direction, dir);
