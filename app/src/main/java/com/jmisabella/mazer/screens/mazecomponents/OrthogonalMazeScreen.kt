@@ -85,12 +85,12 @@ fun OrthogonalMazeScreen(
                 .sortedBy { it.distance }
                 .map { Pair(it.x, it.y) }
 
-            val baseDelay = 0.015
+            val baseDelay = 0.005
             val speedFactor = min(1.0, cellSize.value.toDouble() / 50.0)
             val interval = (baseDelay * speedFactor * 1000.0).toLong()
 
-            pathCoords.forEachIndexed { i, coord ->
-                delay((i * interval).toLong())
+            pathCoords.forEach { coord ->
+                delay(interval)
                 toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
                 vibrator.vibrate(
                     VibrationEffect.createOneShot(
