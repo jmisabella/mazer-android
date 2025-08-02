@@ -122,7 +122,7 @@ fun MazeRenderScreen(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Yellow) // Temporary for debugging
+//                .background(Color.Yellow) // Temporary for debugging
         ) {
             Box(
                 modifier = Modifier
