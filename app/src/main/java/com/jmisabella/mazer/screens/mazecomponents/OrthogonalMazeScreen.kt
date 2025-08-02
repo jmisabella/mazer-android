@@ -6,14 +6,25 @@ import android.media.ToneGenerator
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +53,18 @@ fun OrthogonalMazeScreen(
     val maxDistance = cells.maxOfOrNull { it.distance } ?: 1
     val totalRows = rows
 
+    // Compute cell size
     val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, CellSize.MEDIUM, context).dp
+    val strokeWidth = when(cellSize.value) {
+        in 0f..20f -> 2.dp
+        in 20f..40f -> 3.dp
+        else -> 4.dp
+    }
+    val borderWidth = strokeWidth // Set to strokeWidth to fill the padding area and avoid gaps
+    val totalPadding = strokeWidth * 2 // Account for walls on both sides (reverted to original)
+
+    // Debug logging
+    println("Maze: cols=$columns, rows=$rows, cellSize=${cellSize.value}dp, totalWidth=${(cellSize * columns + totalPadding).value}dp, totalHeight=${(cellSize * rows + totalPadding).value}dp")
 
     val revealedSolutionPath = remember { mutableStateMapOf<Pair<Int, Int>, Boolean>() }
     val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
@@ -68,37 +90,104 @@ fun OrthogonalMazeScreen(
             }
         }
     }
-
     Box(
         modifier = Modifier
-            .size(cellSize * columns, cellSize * rows)
-            .background(if (!isSystemInDarkTheme()) CellColors.offWhite else Color.Black)
+            .fillMaxSize()
+            .background(if (!isSystemInDarkTheme()) CellColors.offWhite else Color.Black),
+        contentAlignment = Alignment.Center
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columns),
-            modifier = Modifier.fillMaxSize()
+        Box(
+            modifier = Modifier
+                .width(cellSize * columns + totalPadding)
+                .wrapContentHeight()
         ) {
-            items(cells.size) { i ->
-                val cell = cells[i]
-                OrthogonalCellScreen(
-                    cell = cell,
-                    cellSize = cellSize,
-                    showSolution = showSolution,
-                    showHeatMap = showHeatMap,
-                    selectedPalette = selectedPalette.value,
-                    maxDistance = maxDistance,
-                    isRevealedSolution = revealedSolutionPath[Pair(cell.x, cell.y)] ?: false,
-                    defaultBackgroundColor = defaultBackgroundColor,
-                    optionalColor = optionalColor,
-                    totalRows = totalRows
+            Column(modifier = Modifier.align(Alignment.Center)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(borderWidth)
+                        .background(Color.Black)
+                )
+                Column(modifier = Modifier.padding(horizontal = strokeWidth)) {
+                    repeat(rows) { row ->
+                        Row {
+                            repeat(columns) { col ->
+                                val i = row * columns + col
+                                val cell = cells[i]
+                                OrthogonalCellScreen(
+                                    cell = cell,
+                                    cellSize = cellSize,
+                                    showSolution = showSolution,
+                                    showHeatMap = showHeatMap,
+                                    selectedPalette = selectedPalette.value,
+                                    maxDistance = maxDistance,
+                                    isRevealedSolution = revealedSolutionPath[Pair(cell.x, cell.y)] ?: false,
+                                    defaultBackgroundColor = defaultBackgroundColor,
+                                    optionalColor = optionalColor,
+                                    totalRows = totalRows
+                                )
+                            }
+                        }
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(borderWidth)
+                        .background(Color.Black)
                 )
             }
         }
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .border(4.dp, Color.Black)
-        )
     }
+//    Box(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(if (!isSystemInDarkTheme()) CellColors.offWhite else Color.Black),
+//        contentAlignment = Alignment.Center
+//    ) {
+//
+//        Box(
+//            modifier = Modifier
+//                .size(cellSize * columns + totalPadding, cellSize * rows + totalPadding)
+//        ) {
+//            LazyVerticalGrid(
+//                columns = GridCells.Fixed(columns),
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .padding(strokeWidth),
+//                userScrollEnabled = false // Disable all scrolling/overscroll
+//            ) {
+//                items(cells.size) { i ->
+//                    val cell = cells[i]
+//                    OrthogonalCellScreen(
+//                        cell = cell,
+//                        cellSize = cellSize,
+//                        showSolution = showSolution,
+//                        showHeatMap = showHeatMap,
+//                        selectedPalette = selectedPalette.value,
+//                        maxDistance = maxDistance,
+//                        isRevealedSolution = revealedSolutionPath[Pair(cell.x, cell.y)] ?: false,
+//                        defaultBackgroundColor = defaultBackgroundColor,
+//                        optionalColor = optionalColor,
+//                        totalRows = totalRows
+//                    )
+//                }
+//            }
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(borderWidth)
+//                    .align(Alignment.TopCenter)
+//                    .background(Color.Black)
+//            )
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(borderWidth)
+//                    .align(Alignment.BottomCenter)
+//                    .background(Color.Black)
+//            )
+//        }
+//    }
 }
+
