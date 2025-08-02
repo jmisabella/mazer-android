@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateMapOf
@@ -55,7 +56,7 @@ fun OrthogonalMazeScreen(
 
     // Compute cell size
     val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, CellSize.MEDIUM, context).dp
-    val strokeWidth = when(cellSize.value) {
+    val strokeWidth = when (cellSize.value) {
         in 0f..20f -> 2.dp
         in 20f..40f -> 3.dp
         else -> 4.dp
@@ -67,8 +68,14 @@ fun OrthogonalMazeScreen(
     println("Maze: cols=$columns, rows=$rows, cellSize=${cellSize.value}dp, totalWidth=${(cellSize * columns + totalPadding).value}dp, totalHeight=${(cellSize * rows + totalPadding).value}dp")
 
     val revealedSolutionPath = remember { mutableStateMapOf<Pair<Int, Int>, Boolean>() }
-    val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
-    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
+    val vibrator = remember { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            toneGenerator.release()
+        }
+    }
 
     LaunchedEffect(showSolution, cells) {
         revealedSolutionPath.clear()
@@ -85,7 +92,12 @@ fun OrthogonalMazeScreen(
             pathCoords.forEachIndexed { i, coord ->
                 delay((i * interval).toLong())
                 toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(
+                        50,
+                        VibrationEffect.DEFAULT_AMPLITUDE
+                    )
+                )
                 revealedSolutionPath[coord] = true
             }
         }
@@ -121,7 +133,8 @@ fun OrthogonalMazeScreen(
                                     showHeatMap = showHeatMap,
                                     selectedPalette = selectedPalette.value,
                                     maxDistance = maxDistance,
-                                    isRevealedSolution = revealedSolutionPath[Pair(cell.x, cell.y)] ?: false,
+                                    isRevealedSolution = revealedSolutionPath[Pair(cell.x, cell.y)]
+                                        ?: false,
                                     defaultBackgroundColor = defaultBackgroundColor,
                                     optionalColor = optionalColor,
                                     totalRows = totalRows
@@ -139,55 +152,5 @@ fun OrthogonalMazeScreen(
             }
         }
     }
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(if (!isSystemInDarkTheme()) CellColors.offWhite else Color.Black),
-//        contentAlignment = Alignment.Center
-//    ) {
-//
-//        Box(
-//            modifier = Modifier
-//                .size(cellSize * columns + totalPadding, cellSize * rows + totalPadding)
-//        ) {
-//            LazyVerticalGrid(
-//                columns = GridCells.Fixed(columns),
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .padding(strokeWidth),
-//                userScrollEnabled = false // Disable all scrolling/overscroll
-//            ) {
-//                items(cells.size) { i ->
-//                    val cell = cells[i]
-//                    OrthogonalCellScreen(
-//                        cell = cell,
-//                        cellSize = cellSize,
-//                        showSolution = showSolution,
-//                        showHeatMap = showHeatMap,
-//                        selectedPalette = selectedPalette.value,
-//                        maxDistance = maxDistance,
-//                        isRevealedSolution = revealedSolutionPath[Pair(cell.x, cell.y)] ?: false,
-//                        defaultBackgroundColor = defaultBackgroundColor,
-//                        optionalColor = optionalColor,
-//                        totalRows = totalRows
-//                    )
-//                }
-//            }
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(borderWidth)
-//                    .align(Alignment.TopCenter)
-//                    .background(Color.Black)
-//            )
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(borderWidth)
-//                    .align(Alignment.BottomCenter)
-//                    .background(Color.Black)
-//            )
-//        }
-//    }
 }
 
