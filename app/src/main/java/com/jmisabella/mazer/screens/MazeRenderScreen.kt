@@ -1,3 +1,4 @@
+// Updated MazeRenderScreen.kt
 package com.jmisabella.mazer.screens
 
 import android.annotation.SuppressLint
@@ -24,7 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.WindowInsets
 import com.jmisabella.mazer.layout.CellSizes
 import com.jmisabella.mazer.layout.computeCellSize
 import com.jmisabella.mazer.layout.navigationMenuHorizontalAdjustment
@@ -75,46 +78,72 @@ fun MazeRenderScreen(
         moveAction(dir)
     }
 
+    // Get status bar insets including display cutout
+    val density = LocalDensity.current
+    val statusBarPadding = WindowInsets.statusBars.asPaddingValues()
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.offset(
-                x = navigationMenuHorizontalAdjustment(mazeType, cellSize, context).dp,
-                y = navigationMenuVerticalAdjustment(mazeType, cellSize, context).dp
-            ),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    top = statusBarPadding.calculateTopPadding() + navigationMenuVerticalAdjustment(mazeType, cellSize, context).dp,
+                    start = statusBarPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = statusBarPadding.calculateEndPadding(LocalLayoutDirection.current)
+                ),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = cleanupMazeData) {
-                Icon(Icons.Default.Menu, contentDescription = "Back to maze settings", tint = Color.Blue)
+                Icon(
+                    Icons.Default.Menu,
+                    contentDescription = "Back to maze settings",
+                    tint = Color.Blue,
+                    modifier = Modifier.size(32.dp)
+                )
             }
             IconButton(onClick = {
                 showSolution.value = false
                 regenerateMaze()
             }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Generate new maze", tint = Color(0xFF800080))
+                Icon(
+                    Icons.Default.Refresh,
+                    contentDescription = "Generate new maze",
+                    tint = Color(0xFF800080),
+                    modifier = Modifier.size(32.dp)
+                )
             }
             IconButton(onClick = { showSolution.value = !showSolution.value }) {
                 Icon(
                     if (showSolution.value) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
                     contentDescription = "Toggle solution path",
-                    tint = if (showSolution.value) Color.Green else Color.Gray
+                    tint = if (showSolution.value) Color.Green else Color.Gray,
+                    modifier = Modifier.size(32.dp)
                 )
             }
             IconButton(onClick = toggleHeatMap) {
                 Icon(
                     if (showHeatMap.value) Icons.Filled.LocalFireDepartment else Icons.Outlined.LocalFireDepartment,
                     contentDescription = "Toggle heat map",
-                    tint = if (showHeatMap.value) Color(0xFFFFA500) else Color.Gray
+                    tint = if (showHeatMap.value) Color(0xFFFFA500) else Color.Gray,
+                    modifier = Modifier.size(32.dp)
                 )
             }
             IconButton(onClick = { showControls.value = !showControls.value }) {
                 Icon(
                     if (showControls.value) Icons.Filled.Close else Icons.Filled.MoreHoriz,
                     contentDescription = "Toggle navigation controls",
-                    tint = Color.Gray
+                    tint = Color.Gray,
+                    modifier = Modifier.size(32.dp)
                 )
             }
             IconButton(onClick = { showHelp.value = true }) {
-                Icon(Icons.Outlined.HelpOutline, contentDescription = "Help instructions", tint = Color.Gray)
+                Icon(
+                    Icons.Outlined.HelpOutline,
+                    contentDescription = "Help instructions",
+                    tint = Color.Gray,
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
 
@@ -122,7 +151,7 @@ fun MazeRenderScreen(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-//                .background(Color.Yellow) // Temporary for debugging
+                .padding(bottom = 20.dp) // Added bottom padding to prevent cutoff at curved corners
         ) {
             Box(
                 modifier = Modifier
@@ -189,7 +218,7 @@ fun MazeRenderScreen(
                             }
                         }
                     }
-                    .noScroll() // Custom modifier to disable scrolling
+                    .noScroll()
             ) {
                 val mazeContent = @Composable {
                     when (mazeType) {
@@ -247,10 +276,8 @@ fun MazeRenderScreen(
     }
 }
 
-// Custom modifier to disable scrolling
 fun Modifier.noScroll(): Modifier = this.then(
     Modifier.pointerInput(Unit) {
-        // Consume all scroll events to prevent scrolling
         awaitPointerEventScope {
             while (true) {
                 val event = awaitPointerEvent()
@@ -260,15 +287,9 @@ fun Modifier.noScroll(): Modifier = this.then(
     }
 )
 
-
 //package com.jmisabella.mazer.screens
 //
 //import android.annotation.SuppressLint
-//import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
-//import com.jmisabella.mazer.screens.directioncontrols.FourWayControlScreen
-//import com.jmisabella.mazer.screens.directioncontrols.FourWayDiagonalControlScreen
-//import com.jmisabella.mazer.screens.directioncontrols.EightWayControlScreen
-//
 //import android.content.Context
 //import android.media.AudioManager
 //import android.media.ToneGenerator
@@ -286,17 +307,24 @@ fun Modifier.noScroll(): Modifier = this.then(
 //import androidx.compose.material3.Text
 //import androidx.compose.runtime.*
 //import androidx.compose.ui.Alignment
-//import androidx.compose.ui.platform.LocalDensity
 //import androidx.compose.ui.Modifier
 //import androidx.compose.ui.geometry.Offset
 //import androidx.compose.ui.graphics.Color
 //import androidx.compose.ui.input.pointer.pointerInput
 //import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.platform.LocalDensity
+//import androidx.compose.ui.platform.LocalLayoutDirection
 //import androidx.compose.ui.unit.dp
+//import androidx.compose.foundation.layout.WindowInsets
 //import com.jmisabella.mazer.layout.CellSizes
+//import com.jmisabella.mazer.layout.computeCellSize
 //import com.jmisabella.mazer.layout.navigationMenuHorizontalAdjustment
 //import com.jmisabella.mazer.layout.navigationMenuVerticalAdjustment
 //import com.jmisabella.mazer.models.*
+//import com.jmisabella.mazer.screens.directioncontrols.EightWayControlScreen
+//import com.jmisabella.mazer.screens.directioncontrols.FourWayControlScreen
+//import com.jmisabella.mazer.screens.directioncontrols.FourWayDiagonalControlScreen
+//import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
 //import kotlin.math.*
 //
 //@SuppressLint("UnusedBoxWithConstraintsScope")
@@ -338,51 +366,80 @@ fun Modifier.noScroll(): Modifier = this.then(
 //        moveAction(dir)
 //    }
 //
+//    // Get status bar insets including display cutout
+//    val density = LocalDensity.current
+//    val statusBarPadding = WindowInsets.statusBars.asPaddingValues()
+//
 //    Column(modifier = Modifier.fillMaxSize()) {
 //        Row(
-//            modifier = Modifier.offset(
-//                x = navigationMenuHorizontalAdjustment(mazeType, cellSize, context).dp,
-//                y = navigationMenuVerticalAdjustment(mazeType, cellSize, context).dp
-//            ),
-//            horizontalArrangement = Arrangement.spacedBy(16.dp)
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(
+//                    top = statusBarPadding.calculateTopPadding() + navigationMenuVerticalAdjustment(mazeType, cellSize, context).dp,
+//                    start = statusBarPadding.calculateStartPadding(LocalLayoutDirection.current),
+//                    end = statusBarPadding.calculateEndPadding(LocalLayoutDirection.current)
+//                ),
+//            horizontalArrangement = Arrangement.Center,
+//            verticalAlignment = Alignment.CenterVertically
 //        ) {
 //            IconButton(onClick = cleanupMazeData) {
-//                Icon(Icons.Default.Menu, contentDescription = "Back to maze settings", tint = Color.Blue)
+//                Icon(
+//                    Icons.Default.Menu,
+//                    contentDescription = "Back to maze settings",
+//                    tint = Color.Blue,
+//                    modifier = Modifier.size(32.dp)
+//                )
 //            }
 //            IconButton(onClick = {
 //                showSolution.value = false
 //                regenerateMaze()
 //            }) {
-//                Icon(Icons.Default.Refresh, contentDescription = "Generate new maze", tint = Color(0xFF800080))
+//                Icon(
+//                    Icons.Default.Refresh,
+//                    contentDescription = "Generate new maze",
+//                    tint = Color(0xFF800080),
+//                    modifier = Modifier.size(32.dp)
+//                )
 //            }
 //            IconButton(onClick = { showSolution.value = !showSolution.value }) {
 //                Icon(
 //                    if (showSolution.value) Icons.Filled.CheckCircle else Icons.Outlined.CheckCircle,
 //                    contentDescription = "Toggle solution path",
-//                    tint = if (showSolution.value) Color.Green else Color.Gray
+//                    tint = if (showSolution.value) Color.Green else Color.Gray,
+//                    modifier = Modifier.size(32.dp)
 //                )
 //            }
 //            IconButton(onClick = toggleHeatMap) {
 //                Icon(
 //                    if (showHeatMap.value) Icons.Filled.LocalFireDepartment else Icons.Outlined.LocalFireDepartment,
 //                    contentDescription = "Toggle heat map",
-//                    tint = if (showHeatMap.value) Color(0xFFFFA500) else Color.Gray
+//                    tint = if (showHeatMap.value) Color(0xFFFFA500) else Color.Gray,
+//                    modifier = Modifier.size(32.dp)
 //                )
 //            }
 //            IconButton(onClick = { showControls.value = !showControls.value }) {
 //                Icon(
 //                    if (showControls.value) Icons.Filled.Close else Icons.Filled.MoreHoriz,
 //                    contentDescription = "Toggle navigation controls",
-//                    tint = Color.Gray
+//                    tint = Color.Gray,
+//                    modifier = Modifier.size(32.dp)
 //                )
 //            }
 //            IconButton(onClick = { showHelp.value = true }) {
-//                Icon(Icons.Outlined.HelpOutline, contentDescription = "Help instructions", tint = Color.Gray)
+//                Icon(
+//                    Icons.Outlined.HelpOutline,
+//                    contentDescription = "Help instructions",
+//                    tint = Color.Gray,
+//                    modifier = Modifier.size(32.dp)
+//                )
 //            }
 //        }
 //
 //        val density = LocalDensity.current.density
-//        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+//        BoxWithConstraints(
+//            modifier = Modifier
+//                .fillMaxSize()
+//        ) {
 //            Box(
 //                modifier = Modifier
 //                    .fillMaxSize()
@@ -428,7 +485,7 @@ fun Modifier.noScroll(): Modifier = this.then(
 //                            val currentDirection = directions[sector]
 //                            lastMoveDirection = currentDirection
 //
-//                            val baseDimDp = com.jmisabella.mazer.layout.computeCellSize(mazeCells, mazeType, cellSize, context)
+//                            val baseDimDp = computeCellSize(mazeCells, mazeType, cellSize, context)
 //                            val baseDim = baseDimDp * density // convert dp to pixels
 //                            val dim = when (mazeType) {
 //                                MazeType.SIGMA -> baseDim * sqrt(3f)
@@ -448,6 +505,7 @@ fun Modifier.noScroll(): Modifier = this.then(
 //                            }
 //                        }
 //                    }
+//                    .noScroll()
 //            ) {
 //                val mazeContent = @Composable {
 //                    when (mazeType) {
@@ -504,4 +562,15 @@ fun Modifier.noScroll(): Modifier = this.then(
 //        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
 //    }
 //}
+//
+//fun Modifier.noScroll(): Modifier = this.then(
+//    Modifier.pointerInput(Unit) {
+//        awaitPointerEventScope {
+//            while (true) {
+//                val event = awaitPointerEvent()
+//                event.changes.forEach { it.consume() }
+//            }
+//        }
+//    }
+//)
 //
