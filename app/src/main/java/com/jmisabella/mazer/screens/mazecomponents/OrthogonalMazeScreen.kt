@@ -1,3 +1,4 @@
+// OrthogonalMazeScreen.kt
 package com.jmisabella.mazer.screens.mazecomponents
 
 import android.content.Context
@@ -8,17 +9,14 @@ import android.os.Vibrator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,9 +60,9 @@ fun OrthogonalMazeScreen(
         else -> 4.dp
     }
     val borderWidth = strokeWidth // Set to strokeWidth to fill the padding area and avoid gaps
-    val totalPadding = strokeWidth * 2 // Account for walls on both sides (reverted to original)
+    val totalPadding = strokeWidth * 2 // Account for walls on both sides
 
-    // Debug logging
+    // Debug logging (optional, can remove if not needed)
     println("Maze: cols=$columns, rows=$rows, cellSize=${cellSize.value}dp, totalWidth=${(cellSize * columns + totalPadding).value}dp, totalHeight=${(cellSize * rows + totalPadding).value}dp")
 
     val revealedSolutionPath = remember { mutableStateMapOf<Pair<Int, Int>, Boolean>() }
@@ -153,4 +151,3 @@ fun OrthogonalMazeScreen(
         }
     }
 }
-
