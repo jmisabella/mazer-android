@@ -1,6 +1,7 @@
 # mazer-android
 Android app using the `mazer` Rust library for generating and solving mazes.
 
+
 ---
 
 ## Setup Instructions

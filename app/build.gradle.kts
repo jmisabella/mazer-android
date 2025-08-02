@@ -2,16 +2,17 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.20" // Match Kotlin version
 }
 
 android {
-    namespace = "com.jmisabella.mazeq"
+    namespace = "com.jmisabella.mazer"
     compileSdk = 36
 
     ndkVersion = "29.0.13599879"
 
     defaultConfig {
-        applicationId = "com.jmisabella.mazeq"
+        applicationId = "com.jmisabella.mazer"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -19,7 +20,7 @@ android {
 
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64") // DEVELOP
-//            abiFilters += listOf("armeabi-v7a", "arm64-v8a") // RELEASE
+            // abiFilters += listOf("armeabi-v7a", "arm64-v8a") // RELEASE
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -49,10 +50,14 @@ android {
     buildFeatures {
         compose = true
     }
+    sourceSets {
+        getByName("main") {
+            jniLibs.srcDirs("src/main/jniLibs")
+        }
+    }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -71,3 +76,4 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("androidx.compose.material:material-icons-extended:1.6.8")
 }
+
