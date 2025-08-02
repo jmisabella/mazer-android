@@ -10,66 +10,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
-//fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: CellSize, context: Context): Float {
-//    val cols = (mazeCells.maxOfOrNull { it.x } ?: 0) + 1
-//    val displayMetrics = context.resources.displayMetrics
-//    val density = displayMetrics.density
-//    val screenWidthDp = displayMetrics.widthPixels.toFloat() / density
-//    val screenHeightDp = displayMetrics.heightPixels.toFloat() / density
-//    return when (mazeType) {
-//        MazeType.ORTHOGONAL -> screenWidthDp / cols.toFloat()
-//        MazeType.DELTA -> computeDeltaCellSize(cellSize, cols, screenWidthDp, screenHeightDp)
-//        MazeType.SIGMA -> {
-//            val units = 1.5f * (cols - 1).toFloat() + 1f
-//            screenWidthDp / units
-//        }
-//        else -> screenWidthDp / cols.toFloat()
-//    }
-//}
-//
-//fun adjustedCellSize(mazeType: MazeType, cellSize: CellSize, context: Context): Float {
-//    val displayMetrics = context.resources.displayMetrics
-//    val density = displayMetrics.density
-//    val screenWidthDp = displayMetrics.widthPixels.toFloat() / density
-//    val screenHeightDp = displayMetrics.heightPixels.toFloat() / density
-//    val screenSize = screenWidthDp to screenHeightDp
-//    val adjustment: Float = when (mazeType) {
-//        MazeType.DELTA -> when (cellSize) {
-//            CellSize.TINY -> 1.07f
-//            CellSize.SMALL -> 1.36f
-//            CellSize.MEDIUM -> 1.47f
-//            CellSize.LARGE -> 1.6f
-//        }
-//        MazeType.ORTHOGONAL -> when (cellSize) {
-//            CellSize.TINY -> 1.2f
-//            CellSize.SMALL -> 1.3f
-//            CellSize.MEDIUM -> 1.65f
-//            CellSize.LARGE -> 1.8f
-//        }
-//        MazeType.SIGMA -> when (cellSize) {
-//            CellSize.TINY -> 0.5f
-//            CellSize.SMALL -> 0.65f
-//            CellSize.MEDIUM -> 0.75f
-//            CellSize.LARGE -> 0.8f
-//        }
-//        MazeType.UPSILON -> when (cellSize) {
-//            CellSize.TINY -> 2.35f
-//            CellSize.SMALL -> 2.5f
-//            CellSize.MEDIUM -> 2.85f
-//            CellSize.LARGE -> 3.3f
-//        }
-//        MazeType.RHOMBIC -> when (cellSize) {
-//            CellSize.TINY -> 0.97f
-//            CellSize.SMALL -> 1.07f
-//            CellSize.MEDIUM -> 1.2f
-//            CellSize.LARGE -> if (screenSize.first == 440f && screenSize.second == 956f ||
-//                screenSize.first == 414f && screenSize.second == 896f) 1.4f else 1.5f
-//        }
-//    }
-//    val rawSize = cellSize.value.toFloat()
-//    return adjustment * rawSize
-//}
-
 fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: CellSize, context: Context): Float {
     val cols = (mazeCells.maxOfOrNull { it.x } ?: 0) + 1
     val rows = (mazeCells.maxOfOrNull { it.y } ?: 0) + 1

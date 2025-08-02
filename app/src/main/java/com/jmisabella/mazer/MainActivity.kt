@@ -25,6 +25,7 @@ import com.jmisabella.mazer.screens.MazeRenderScreen
 import com.jmisabella.mazer.screens.MazeRequestScreen
 import com.jmisabella.mazer.ui.theme.MazerTheme
 import com.jmisabella.mazer.layout.computeCellSizes
+import com.jmisabella.mazer.screens.MazeGenerationAnimationScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -465,7 +466,25 @@ fun ContentScreen() {
     if (isGeneratingMazeState.value) {
         CircularProgressIndicator(modifier = Modifier.fillMaxSize())
     } else if (isAnimatingGenerationState.value) {
-        Text("Maze Generation Animation Placeholder") // TODO: Implement MazeGenerationAnimationScreen
+        MazeGenerationAnimationScreen(
+            generationSteps = generationStepsState.value,
+            mazeType = mazeTypeState.value,
+            cellSize = selectedSizeState.value,
+            isAnimatingGeneration = isAnimatingGenerationState,
+            mazeGenerated = mazeGeneratedState,
+            showSolution = showSolutionState,
+            showHeatMap = showHeatMapState,
+            showControls = showControlsState,
+            selectedPalette = selectedPaletteState,
+            defaultBackground = defaultBackgroundColorState,
+            showHelp = showHelpState,
+            mazeID = mazeIDState.value,
+            currentGrid = currentGridState.value,
+            regenerateMaze = { submitMazeRequest() },
+            cleanupMazeData = { cleanupMazeData() },
+            cellSizes = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, LocalContext.current),
+            optionalColor = optionalColorState.value
+        )
     } else if (mazeGeneratedState.value) {
         MazeRenderScreen(
             mazeGenerated = mazeGeneratedState,  // Pass shared state
