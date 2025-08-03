@@ -22,6 +22,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun DeltaMazeScreen(
@@ -65,12 +67,30 @@ fun DeltaMazeScreen(
                 .filter { it.onSolutionPath && !it.isVisited }
                 .sortedBy { it.distance }
 
-            val rapidDelay = 0.015
-            pathCells.forEachIndexed { index, cell ->
-                delay((index * rapidDelay * 1000).toLong())
-                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-                vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-                revealedSolutionPath[Coordinates(cell.x, cell.y)] = true
+            val totalAnimationTimeMs = 2000L
+            val minDelayMs = 16L // approx 60fps
+            val numSteps = (totalAnimationTimeMs / minDelayMs).toInt()
+            val batchSize = max(1, (pathCells.size + numSteps - 1) / numSteps) // ceiling division
+
+            var index = 0
+            var lastFeedbackTime = 0L
+            val minFeedbackInterval = 50L // Minimum time between feedback in ms
+
+            while (index < pathCells.size) {
+                val end = min(index + batchSize, pathCells.size)
+                for (i in index until end) {
+                    val cell = pathCells[i]
+                    revealedSolutionPath[Coordinates(cell.x, cell.y)] = true
+                }
+                delay(minDelayMs)
+
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastFeedbackTime >= minFeedbackInterval) {
+                    toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+                    lastFeedbackTime = currentTime
+                }
+                index += batchSize
             }
         } else {
             revealedSolutionPath.clear()
@@ -135,3 +155,4 @@ fun DeltaMazeScreen(
         )
     }
 }
+
