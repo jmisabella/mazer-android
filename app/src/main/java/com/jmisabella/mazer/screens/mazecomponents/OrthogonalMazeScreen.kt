@@ -62,8 +62,7 @@ fun OrthogonalMazeScreen(
     val borderWidth = strokeWidth // Set to strokeWidth to fill the padding area and avoid gaps
     val totalPadding = strokeWidth * 2 // Account for walls on both sides
 
-    // Debug logging (optional, can remove if not needed)
-    println("Maze: cols=$columns, rows=$rows, cellSize=${cellSize.value}dp, totalWidth=${(cellSize * columns + totalPadding).value}dp, totalHeight=${(cellSize * rows + totalPadding).value}dp")
+//    println("Maze: cols=$columns, rows=$rows, cellSize=${cellSize.value}dp, totalWidth=${(cellSize * columns + totalPadding).value}dp, totalHeight=${(cellSize * rows + totalPadding).value}dp")
 
     val revealedSolutionPath = remember { mutableStateMapOf<Pair<Int, Int>, Boolean>() }
     val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
