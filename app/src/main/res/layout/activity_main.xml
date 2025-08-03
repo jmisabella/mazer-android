@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- GIF 1: loading-blue -->
+    <ImageView
+        android:id="@+id/loadingBlueImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/loading_blue" />
+
+    <!-- GIF 2: loading-orange -->
+    <ImageView
+        android:id="@+id/loadingOrangeImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/loading_orange" />
+
+    <!-- GIF 3: loading-purple -->
+    <ImageView
+        android:id="@+id/loadingPurpleImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/loading_purple" />
+
+    <!-- GIF 4: loading-red-orange -->
+    <ImageView
+        android:id="@+id/loadingRedOrangeImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/loading_red_orange" />
+
+</LinearLayout>
