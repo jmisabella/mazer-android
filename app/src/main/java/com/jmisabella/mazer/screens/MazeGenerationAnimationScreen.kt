@@ -32,6 +32,7 @@ import com.jmisabella.mazer.layout.CellSizes
 import com.jmisabella.mazer.layout.computeCellSize
 import com.jmisabella.mazer.layout.navigationMenuVerticalAdjustment
 import com.jmisabella.mazer.models.*
+import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
 import kotlinx.coroutines.delay
 
@@ -162,12 +163,24 @@ fun MazeGenerationAnimationScreen(
                 val currentCells = generationSteps[currentStepIndex]
 
                 val mazeContent = @Composable {
+                    val maxDistance = currentCells.maxOfOrNull { it.distance } ?: 1
+                    val cellSizeValue = computeCellSize(currentCells, mazeType, cellSize, context)
                     when (mazeType) {
                         MazeType.ORTHOGONAL -> OrthogonalMazeScreen(
                             selectedPalette = selectedPalette,
                             cells = currentCells,
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
+                        MazeType.DELTA -> DeltaMazeScreen(
+                            cells = currentCells,
+                            cellSize = cellSizeValue,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
+                            maxDistance = maxDistance,
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
