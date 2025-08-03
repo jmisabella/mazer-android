@@ -225,6 +225,9 @@ fun ContentScreen() {
                     val pitch = diag * 0.5f
                     finalWidth = maxOf(1, floor(screenW / diag).toInt())
                     finalHeight = maxOf(1, floor(drawableH / pitch).toInt())
+                } else if (selectedMazeTypeState.value == MazeType.DELTA) {
+                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt()) // Adjust based on Swift's 0.75 factor
+                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
                 } else {
                     finalWidth = if (selectedMazeTypeState.value == MazeType.SIGMA) maxWidth / 3 else maxWidth
                     finalHeight = if (selectedMazeTypeState.value == MazeType.SIGMA) maxHeightRows / 3 else maxHeightRows
