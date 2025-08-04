@@ -38,6 +38,7 @@ import com.jmisabella.mazer.screens.directioncontrols.FourWayControlScreen
 import com.jmisabella.mazer.screens.directioncontrols.FourWayDiagonalControlScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
 import kotlin.math.*
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -240,6 +241,15 @@ fun MazeRenderScreen(
                             showHeatMap = showHeatMap.value,
                             selectedPalette = selectedPalette.value,
                             maxDistance = maxDistance,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
+                        MazeType.SIGMA -> SigmaMazeScreen(
+                            cells = mazeCells,
+                            cellSize = cellSizeValue,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
