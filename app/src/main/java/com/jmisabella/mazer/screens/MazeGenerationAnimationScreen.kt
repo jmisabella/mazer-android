@@ -34,6 +34,7 @@ import com.jmisabella.mazer.layout.navigationMenuVerticalAdjustment
 import com.jmisabella.mazer.models.*
 import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -184,6 +185,16 @@ fun MazeGenerationAnimationScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
+                        MazeType.SIGMA -> SigmaMazeScreen(
+                            cells = currentCells,
+                            cellSize = cellSizeValue,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
+
                         else -> Text("Unsupported maze type")
                     }
                 }

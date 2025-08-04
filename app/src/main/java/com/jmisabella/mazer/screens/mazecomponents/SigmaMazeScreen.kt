@@ -110,7 +110,6 @@ fun SigmaMazeScreen(
             modifier = Modifier
                 .size(totalWidth.dp, totalHeight.dp)
         ) {
-//            val density = LocalDensity.current.density
             cells.forEach { cell ->
                 val q = cell.x.toFloat()
                 val r = cell.y.toFloat()
@@ -125,8 +124,8 @@ fun SigmaMazeScreen(
                 val offsetDpY = pos.y.dp - centerToTop
 
                 val density = LocalDensity.current
-                val offsetX = with(density) { offsetDpX.toPx() }.roundToInt()
-                val offsetY = with(density) { offsetDpY.toPx() }.roundToInt()
+                val offsetX = (offsetDpX.value * density.density).roundToInt()
+                val offsetY = (offsetDpY.value * density.density).roundToInt()
 
                 SigmaCellScreen(
                     cell = cell,
@@ -143,6 +142,38 @@ fun SigmaMazeScreen(
                     modifier = Modifier.offset { IntOffset(offsetX, offsetY) }
                 )
             }
+//            cells.forEach { cell ->
+//                val q = cell.x.toFloat()
+//                val r = cell.y.toFloat()
+//                val x = cellSize * 1.5f * q + cellSize
+//                val yOffset = if (cell.x % 2 == 0) 0f else hexHeight / 2f
+//                val y = hexHeight * r + hexHeight / 2f + yOffset
+//                val pos = Offset(x, y)
+//
+//                val centerToLeft = cellSize.dp
+//                val centerToTop = (hexHeight / 2f).dp
+//                val offsetDpX = pos.x.dp - centerToLeft
+//                val offsetDpY = pos.y.dp - centerToTop
+//
+//                val density = LocalDensity.current
+//                val offsetX = with(density) { offsetDpX.toPx() }.roundToInt()
+//                val offsetY = with(density) { offsetDpY.toPx() }.roundToInt()
+//
+//                SigmaCellScreen(
+//                    cell = cell,
+//                    cellSize = cellSize,
+//                    showSolution = showSolution,
+//                    showHeatMap = showHeatMap,
+//                    selectedPalette = selectedPalette,
+//                    maxDistance = maxDistance,
+//                    isRevealedSolution = revealedSolutionPath[Coordinates(cell.x, cell.y)] ?: false,
+//                    defaultBackgroundColor = defaultBackgroundColor,
+//                    optionalColor = optionalColor,
+//                    totalRows = totalRows,
+//                    cellMap = cellMap,
+//                    modifier = Modifier.offset { IntOffset(offsetX, offsetY) }
+//                )
+//            }
         }
     }
 }
