@@ -3,9 +3,17 @@ package com.jmisabella.mazer.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.RenderEffect
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Vibrator
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseInQuad
+import androidx.compose.animation.core.EaseOutQuad
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -22,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -39,7 +49,138 @@ import com.jmisabella.mazer.screens.directioncontrols.FourWayDiagonalControlScre
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.*
+import kotlin.random.Random
+import android.graphics.ColorMatrix as AndroidColorMatrix
+
+private class Sparkle(
+    val x: Double,
+    val y: Double,
+    val size: Double,
+    val symbol: androidx.compose.ui.graphics.vector.ImageVector,
+    val color: Color
+) {
+    var phase by mutableStateOf(0)
+}
+
+@Composable
+private fun SparkleScreen(
+    count: Int = 60,
+    totalDuration: Float = 3f,
+    onFinished: () -> Unit = {}
+) {
+    val symbols = listOf(
+        Icons.Default.AutoAwesome,
+        Icons.Filled.Star,
+        Icons.Filled.Circle
+    )
+    val colors: List<Color> = listOf(Color.Yellow, Color.Magenta, Color(0xFF98FB98), Color(0xFFFFA500))
+
+    val sparkles = remember { mutableStateListOf<Sparkle>() }
+    val density = LocalDensity.current
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val widthInDp = with(density) { constraints.maxWidth.toDp() }
+        val heightInDp = with(density) { constraints.maxHeight.toDp() }
+
+        sparkles.forEach { sparkle ->
+            val targetOpacity = when (sparkle.phase) {
+                1, 2 -> 1f
+                else -> 0f
+            }
+            val opacity = animateFloatAsState(
+                targetValue = targetOpacity,
+                animationSpec = if (sparkle.phase == 1) {
+                    tween<Float>((totalDuration * 0.12f * 1000).toInt(), easing = EaseOutQuad)
+                } else if (sparkle.phase == 3) {
+                    tween<Float>((totalDuration * 0.12f * 1000).toInt(), easing = EaseInQuad)
+                } else {
+                    snap()
+                },
+                label = "opacity"
+            )
+
+            val targetScale = if (sparkle.phase >= 1) 1f else 0.1f
+            val scale = animateFloatAsState(
+                targetValue = targetScale,
+                animationSpec = if (sparkle.phase == 1) {
+                    tween<Float>((totalDuration * 0.12f * 1000).toInt(), easing = EaseOutQuad)
+                } else {
+                    snap()
+                },
+                label = "scale"
+            )
+
+            Icon(
+                imageVector = sparkle.symbol,
+                contentDescription = null,
+                tint = sparkle.color,
+                modifier = Modifier
+                    .size(sparkle.size.dp)
+                    .graphicsLayer {
+                        alpha = opacity.value
+                        scaleX = scale.value
+                        scaleY = scale.value
+                    }
+                    .offset(
+                        x = (sparkle.x * widthInDp.value).dp,
+                        y = (sparkle.y * heightInDp.value).dp
+                    )
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val stagger = totalDuration * 0.5f / count
+        val newSparkles = (0 until count).map {
+            Sparkle(
+                x = Random.nextDouble(),
+                y = Random.nextDouble(),
+                size = Random.nextDouble(20.0, 50.0),
+                symbol = symbols.random(),
+                color = colors.random()
+            )
+        }
+        sparkles.addAll(newSparkles)
+
+        for ((i, sparkle) in newSparkles.withIndex()) {
+            delay((i * stagger * 1000f).toLong())
+            sparkle.phase = 1
+        }
+
+        delay(((totalDuration + 0.5f) * 1000f).toLong())
+        sparkles.clear()
+        onFinished()
+    }
+
+    sparkles.forEach { sparkle ->
+        LaunchedEffect(sparkle.phase) {
+            val fadeInDur = totalDuration * 0.12f
+            val fadeOutDur = totalDuration * 0.12f
+            val visibleDur = totalDuration * 0.5f
+            when (sparkle.phase) {
+                1 -> {
+                    delay((fadeInDur * 1000f).toLong())
+                    sparkle.phase = 2
+                }
+                2 -> {
+                    delay((visibleDur * 1000f).toLong())
+                    sparkle.phase = 3
+                }
+                3 -> {
+                    delay((fadeOutDur * 1000f).toLong())
+                    sparkle.phase = 4
+                }
+            }
+        }
+    }
+}
+
+fun colorMatrixSaturation(saturation: Float): AndroidColorMatrix {
+    return AndroidColorMatrix().apply { setSaturation(saturation) }
+}
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -58,7 +199,7 @@ fun MazeRenderScreen(
     cellSize: CellSize,
     optionalColor: Color?,
     regenerateMaze: () -> Unit,
-    moveAction: (String) -> Unit,
+    moveAction: (String) -> Boolean,  // Updated to return Boolean indicating if maze is completed after move
     cellSizes: CellSizes,
     toggleHeatMap: () -> Unit,
     cleanupMazeData: () -> Unit
@@ -74,10 +215,20 @@ fun MazeRenderScreen(
     var lastMoveDirection by remember { mutableStateOf<String?>(null) }
     var performedMoves by remember { mutableStateOf(0) }
     var dragStartOffset by remember { mutableStateOf(Offset.Zero) }
+    var showSparkles by remember { mutableStateOf(false) }
+    val saturationAnim = remember { Animatable(1f) }
 
     val performMove: (String) -> Unit = { dir ->
         showSolution.value = false
-        moveAction(dir)
+        if (moveAction(dir)) {
+            // Trigger celebration on completion
+            toneGenerator.startTone(ToneGenerator.TONE_SUP_CONFIRM, 500)
+            showSparkles = true
+            coroutineScope.launch {
+                saturationAnim.animateTo(0f, tween(200, easing = EaseInQuad))
+                saturationAnim.animateTo(1f, tween(200, easing = EaseOutQuad))
+            }
+        }
     }
 
     // Get status bar insets including display cutout
@@ -221,6 +372,11 @@ fun MazeRenderScreen(
                         }
                     }
                     .noScroll()
+                    .graphicsLayer {
+                        renderEffect = RenderEffect.createColorFilterEffect(
+                            ColorMatrixColorFilter(colorMatrixSaturation(saturationAnim.value))
+                        ).asComposeRenderEffect()
+                    }
             ) {
                 val mazeContent = @Composable {
                     val maxDistance = mazeCells.maxOfOrNull { it.distance } ?: 1
@@ -284,6 +440,10 @@ fun MazeRenderScreen(
                     }
                 }
             }
+
+            if (showSparkles) {
+                SparkleScreen(onFinished = { showSparkles = false })
+            }
         }
     }
 
@@ -309,4 +469,3 @@ fun Modifier.noScroll(): Modifier = this.then(
         }
     }
 )
-
