@@ -37,6 +37,8 @@ import com.jmisabella.mazer.screens.directioncontrols.EightWayControlScreen
 import com.jmisabella.mazer.screens.directioncontrols.FourWayControlScreen
 import com.jmisabella.mazer.screens.directioncontrols.FourWayDiagonalControlScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
 import kotlin.math.*
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -221,12 +223,33 @@ fun MazeRenderScreen(
                     .noScroll()
             ) {
                 val mazeContent = @Composable {
+                    val maxDistance = mazeCells.maxOfOrNull { it.distance } ?: 1
+                    val cellSizeValue = computeCellSize(mazeCells, mazeType, cellSize, context)
                     when (mazeType) {
                         MazeType.ORTHOGONAL -> OrthogonalMazeScreen(
                             selectedPalette = selectedPalette,
                             cells = mazeCells,
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
+                        MazeType.DELTA -> DeltaMazeScreen(
+                            cells = mazeCells,
+                            cellSize = cellSizeValue,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
+                            maxDistance = maxDistance,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
+                        MazeType.SIGMA -> SigmaMazeScreen(
+                            cells = mazeCells,
+                            cellSize = cellSizeValue,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )

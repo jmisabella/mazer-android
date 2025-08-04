@@ -37,9 +37,32 @@ fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: Cel
             min(cellFromWidth, cellFromHeight)
         }
         MazeType.DELTA -> computeDeltaCellSize(cellSize, cols, screenWidthDp, screenHeightDp)
+//        MazeType.SIGMA -> {
+//            val units = 1.5f * (cols - 1).toFloat() + 1f
+//            screenWidthDp / units
+//        }
         MazeType.SIGMA -> {
             val units = 1.5f * (cols - 1).toFloat() + 1f
-            screenWidthDp / units
+            val cellFromWidth = screenWidthDp / units
+
+            val statusResourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+            val statusBarHeightPx = if (statusResourceId > 0) context.resources.getDimensionPixelSize(statusResourceId) else 0
+            val statusBarHeightDp = statusBarHeightPx.toFloat() / density
+
+            val navResourceId = context.resources.getIdentifier("navigation_bar_height", "dimen", "android")
+            val navBarHeightPx = if (navResourceId > 0) context.resources.getDimensionPixelSize(navResourceId) else 0
+            val navBarHeightDp = navBarHeightPx.toFloat() / density
+
+            val menuVerticalAdj = navigationMenuVerticalAdjustment(mazeType, cellSize, context)
+            val estimatedRowHeight = 48f // Approximate height of the navigation menu row
+            val estimatedBottomPadding = 20f // As defined in MazeRenderScreen.kt
+            val overhead = statusBarHeightDp + menuVerticalAdj + estimatedRowHeight + navBarHeightDp + estimatedBottomPadding
+            val availableHeightDp = screenHeightDp - overhead
+
+            val hexH = sqrt(3f)
+            val cellFromHeight = availableHeightDp / (hexH * (rows.toFloat() + 0.5f))
+
+            min(cellFromWidth, cellFromHeight)
         }
         else -> screenWidthDp / cols.toFloat()
     }

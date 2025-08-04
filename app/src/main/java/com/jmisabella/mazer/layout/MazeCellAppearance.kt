@@ -31,9 +31,12 @@ fun interpolateColor(start: Color, end: Color, factor: Double): Color {
 
 fun wallStrokeWidth(mazeType: MazeType, cellSize: Float, density: Float): Float {
     val denominator: Float = when (mazeType) {
-        MazeType.DELTA -> if (cellSize >= 28f) 10f else 12f
-        MazeType.ORTHOGONAL -> if (cellSize >= 18f) 6f else 6f
-        MazeType.SIGMA -> if (cellSize >= 18f) 6f else 7f
+//        MazeType.DELTA -> if (cellSize >= 28f) 10f else 12f
+//        MazeType.ORTHOGONAL -> if (cellSize >= 18f) 6f else 6f
+//        MazeType.SIGMA -> if (cellSize >= 18f) 6f else 7f
+        MazeType.DELTA -> if (cellSize >= 18f) 2f else 1.25f
+        MazeType.ORTHOGONAL -> if (cellSize >= 18f) 6f else 4.5f
+        MazeType.SIGMA -> if (cellSize >= 18f) 1.8f else 1.6f
         MazeType.UPSILON -> if (cellSize >= 28f) 12f else 16f
         MazeType.RHOMBIC -> if (cellSize >= 18f) 7f else 4.8f
     }
