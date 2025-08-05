@@ -9,6 +9,7 @@ import android.os.Vibrator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +28,7 @@ import com.jmisabella.mazer.ui.theme.MazerTheme
 import com.jmisabella.mazer.layout.computeCellSizes
 import com.jmisabella.mazer.screens.MazeGenerationAnimationScreen
 import com.jmisabella.mazer.screens.effects.LoadingOverlay
+import com.jmisabella.mazer.screens.effects.SparkleScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,7 +52,7 @@ data class MazeRequest(
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Enable edge-to-edge display
+        enableEdgeToEdge()
         setContent {
             MazerTheme {
                 Surface(
@@ -71,13 +73,12 @@ fun ContentScreen() {
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
 
-    // Explicit MutableState objects (instead of delegated vars)
+    // State declarations
     val ffiIntegrationTestResultState = remember { mutableStateOf(0) }
     val mazeCellsState = remember { mutableStateOf<List<MazeCell>>(emptyList()) }
     val mazeTypeState = remember { mutableStateOf(MazeType.ORTHOGONAL) }
     val mazeGeneratedState = remember { mutableStateOf(false) }
     val errorMessageState = remember { mutableStateOf<String?>(null) }
-
     val selectedSizeState = remember { mutableStateOf(CellSize.LARGE) }
     val selectedMazeTypeState = remember { mutableStateOf(MazeType.ORTHOGONAL) }
     val selectedAlgorithmState = remember { mutableStateOf(MazeAlgorithm.RECURSIVE_BACKTRACKER) }
@@ -88,7 +89,7 @@ fun ContentScreen() {
     val showCelebrationState = remember { mutableStateOf(false) }
     val selectedPaletteState = remember { mutableStateOf(allPalettes.randomOrNull() ?: turquoisePalette) }
     val mazeIDState = remember { mutableStateOf(UUID.randomUUID().toString()) }
-    val currentGridState = remember { mutableStateOf<Long?>(null) } // Grid* as Long
+    val currentGridState = remember { mutableStateOf<Long?>(null) }
     val defaultBackgroundColorState = remember { mutableStateOf<Color>(CellColors.defaultBackgroundColors.randomOrNull() ?: Color.White) }
     val didInitialRandomizationState = remember { mutableStateOf(false) }
     val hasPlayedSoundThisSessionState = remember { mutableStateOf(false) }
@@ -108,7 +109,6 @@ fun ContentScreen() {
         selectedAlgorithmState.value = MazeAlgorithm.values().find { it.name == sharedPrefs.getString("lastAlgorithm", MazeAlgorithm.RECURSIVE_BACKTRACKER.name) } ?: MazeAlgorithm.RECURSIVE_BACKTRACKER
         showHeatMapState.value = sharedPrefs.getBoolean("showHeatMap", false)
 
-        // Save initial preferences
         sharedPrefs.edit().apply {
             putInt("lastSize", selectedSizeState.value.value)
             putString("lastMazeType", selectedMazeTypeState.value.ffiName)
@@ -117,7 +117,6 @@ fun ContentScreen() {
             apply()
         }
 
-        // Run FFI integration test
         ffiIntegrationTestResultState.value = MazerNative.mazerFfiIntegrationTest()
         println("mazer_ffi_integration_test returned: ${ffiIntegrationTestResultState.value}")
         if (ffiIntegrationTestResultState.value == 42) {
@@ -127,7 +126,7 @@ fun ContentScreen() {
         }
     }
 
-    // Save preferences on change (use .value)
+    // Save preferences on change
     LaunchedEffect(selectedSizeState.value) {
         context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
             .edit()
@@ -153,19 +152,16 @@ fun ContentScreen() {
             .apply()
     }
 
-    // Random palette selection excluding current
     fun randomPaletteExcluding(current: HeatMapPalette, allPalettes: List<HeatMapPalette>): HeatMapPalette {
         val availablePalettes = allPalettes.filter { it != current }
         return availablePalettes.randomOrNull() ?: current
     }
 
-    // Random default background color excluding current
     fun randomDefaultExcluding(current: Color, all: List<Color>): Color {
         val others = all.filter { it != current }
         return others.randomOrNull() ?: current
     }
 
-    // Cleanup maze data (use .value)
     fun cleanupMazeData() {
         currentGridState.value?.let { gridPtr ->
             MazerNative.destroyMaze(gridPtr)
@@ -177,22 +173,17 @@ fun ContentScreen() {
         isAnimatingGenerationState.value = false
     }
 
-    // Submit maze request (use .value)
     fun submitMazeRequest() {
         coroutineScope.launch {
-
-            println("FFI integration test result: " + MazerNative.mazerFfiIntegrationTest())
-
+            println("FFI integration test result: ${MazerNative.mazerFfiIntegrationTest()}")
             isLoadingState.value = true
             withContext(Dispatchers.IO) {
-                // Cleanup existing grid
                 currentGridState.value?.let { gridPtr ->
                     MazerNative.destroyMaze(gridPtr)
                     currentGridState.value = null
                 }
 
                 val (squareCellSize, octagonCellSize) = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, context)
-                // Get screen dimensions
                 val metrics = context.resources.displayMetrics
                 val screenH = metrics.heightPixels / metrics.density
                 val screenW = metrics.widthPixels / metrics.density
@@ -207,7 +198,7 @@ fun ContentScreen() {
                 val totalVerticalPadding = perSidePad * 2
                 val controlArea = 80f
                 val availableH = screenH - controlArea - totalVerticalPadding
-                val drawableH = availableH // Simplified; adjust for insets if needed
+                val drawableH = availableH
 
                 val cellSize = if (selectedMazeTypeState.value == MazeType.UPSILON) octagonCellSize else squareCellSize
                 val spacing = if (selectedMazeTypeState.value == MazeType.UPSILON) (sqrt(2f) * 0.5f) * octagonCellSize else cellSize
@@ -226,7 +217,7 @@ fun ContentScreen() {
                     finalWidth = maxOf(1, floor(screenW / diag).toInt())
                     finalHeight = maxOf(1, floor(drawableH / pitch).toInt())
                 } else if (selectedMazeTypeState.value == MazeType.DELTA) {
-                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt()) // Adjust based on Swift's 0.75 factor
+                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
                     finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
                 } else {
                     finalWidth = if (selectedMazeTypeState.value == MazeType.SIGMA) maxWidth / 3 else maxWidth
@@ -242,10 +233,10 @@ fun ContentScreen() {
                 }
 
                 val mazeRequest = MazeRequest(
-                    mazeType = selectedMazeTypeState.value.ffiName, // Use ffiName
+                    mazeType = selectedMazeTypeState.value.ffiName,
                     width = finalWidth,
                     height = finalHeight,
-                    algorithm = selectedAlgorithmState.value.ffiName, // Use ffiName
+                    algorithm = selectedAlgorithmState.value.ffiName,
                     captureSteps = captureStepsState.value
                 )
 
@@ -351,16 +342,13 @@ fun ContentScreen() {
         }
     }
 
-    // Celebrate victory (use .value)
     fun celebrateVictory() {
         showCelebrationState.value = true
         captureStepsState.value = false
-
         vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 200)
-
         coroutineScope.launch {
-            kotlinx.coroutines.delay(3000)
+            kotlinx.coroutines.delay(2000)
             withContext(Dispatchers.Main) {
                 showCelebrationState.value = false
                 if (mazeGeneratedState.value) {
@@ -372,14 +360,9 @@ fun ContentScreen() {
         }
     }
 
-    // In MainActivity.kt, replace the performMove function with the following:
-
-    // Perform move (use .value)
     fun performMove(direction: String): Boolean {
         if (showCelebrationState.value) return false
-
         val gridPtr = currentGridState.value ?: return false
-
         val tryDirections = when (mazeTypeState.value) {
             MazeType.ORTHOGONAL -> listOf(direction)
             MazeType.DELTA -> when (direction) {
@@ -437,8 +420,6 @@ fun ContentScreen() {
         }
 
         mazeCellsState.value = cells
-
-        // Return true if the player has reached the goal
         val isGoalReached = cells.any { it.isGoal && it.isActive }
         if (isGoalReached && !showCelebrationState.value) {
             celebrateVictory()
@@ -446,136 +427,73 @@ fun ContentScreen() {
         return isGoalReached
     }
 
-//    fun performMove(direction: String) {
-//        if (showCelebrationState.value) return
-//
-//        val gridPtr = currentGridState.value ?: return
-//
-//        val tryDirections = when (mazeTypeState.value) {
-//            MazeType.ORTHOGONAL -> listOf(direction)
-//            MazeType.DELTA -> when (direction) {
-//                "UpperRight" -> listOf("UpperRight", "Right")
-//                "LowerRight" -> listOf("LowerRight", "Right")
-//                "UpperLeft" -> listOf("UpperLeft", "Left")
-//                "LowerLeft" -> listOf("LowerLeft", "Left")
-//                else -> listOf(direction)
-//            }
-//            MazeType.SIGMA -> when (direction) {
-//                "UpperRight" -> listOf("UpperRight", "LowerRight")
-//                "LowerRight" -> listOf("LowerRight", "UpperRight")
-//                "UpperLeft" -> listOf("UpperLeft", "LowerLeft")
-//                "LowerLeft" -> listOf("LowerLeft", "UpperLeft")
-//                else -> listOf(direction)
-//            }
-//            MazeType.UPSILON -> listOf(direction)
-//            MazeType.RHOMBIC -> listOf(direction)
-//        }
-//
-//        var newGridPtr: Long? = null
-//        for (dir in tryDirections) {
-//            newGridPtr = MazerNative.makeMove(gridPtr, dir)
-//            if (newGridPtr != 0L) break
-//        }
-//
-//        if (newGridPtr == null || newGridPtr == 0L) return
-//
-//        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-//        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
-//
-//        currentGridState.value = newGridPtr
-//        val cellsPtr = MazerNative.getCells(newGridPtr)
-//        if (cellsPtr == null) {
-//            errorMessageState.value = "Failed to retrieve updated maze."
-//            return
-//        }
-//
-//        val cells = cellsPtr.map { ffiCell ->
-//            MazeCell(
-//                x = ffiCell.x.toInt(),
-//                y = ffiCell.y.toInt(),
-//                mazeType = ffiCell.maze_type ?: "",
-//                linked = ffiCell.linked?.toList() ?: emptyList(),
-//                distance = ffiCell.distance,
-//                isStart = ffiCell.is_start,
-//                isGoal = ffiCell.is_goal,
-//                isActive = ffiCell.is_active,
-//                isVisited = ffiCell.is_visited,
-//                hasBeenVisited = ffiCell.has_been_visited,
-//                onSolutionPath = ffiCell.on_solution_path,
-//                orientation = ffiCell.orientation ?: "",
-//                isSquare = ffiCell.is_square
-//            )
-//        }
-//
-//        mazeCellsState.value = cells
-//
-//        if (!showCelebrationState.value && cells.any { it.isGoal && it.isActive }) {
-//            celebrateVictory()
-//        }
-//    }
-
-    // Main content rendering (use .value and pass shared states directly)
-    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
-        if (isGeneratingMazeState.value) {
-            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-        } else if (isAnimatingGenerationState.value) {
-            MazeGenerationAnimationScreen(
-                generationSteps = generationStepsState.value,
-                mazeType = mazeTypeState.value,
-                cellSize = selectedSizeState.value,
-                isAnimatingGeneration = isAnimatingGenerationState,
-                mazeGenerated = mazeGeneratedState,
-                showSolution = showSolutionState,
-                showHeatMap = showHeatMapState,
-                showControls = showControlsState,
-                selectedPalette = selectedPaletteState,
-                defaultBackground = defaultBackgroundColorState,
-                showHelp = showHelpState,
-                mazeID = mazeIDState.value,
-                currentGrid = currentGridState.value,
-                regenerateMaze = { submitMazeRequest() },
-                cleanupMazeData = { cleanupMazeData() },
-                cellSizes = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, LocalContext.current),
-                optionalColor = optionalColorState.value
-            )
-        } else if (mazeGeneratedState.value) {
-            MazeRenderScreen(
-                mazeGenerated = mazeGeneratedState,  // Pass shared state
-                showSolution = showSolutionState,     // Pass shared state
-                showHeatMap = showHeatMapState,       // Pass shared state
-                showControls = showControlsState,     // Pass shared state
-                padOffset = padOffsetState,           // Pass shared state
-                selectedPalette = selectedPaletteState, // Pass shared state
-                mazeID = mazeIDState.value,
-                defaultBackground = defaultBackgroundColorState, // Pass shared state
-                showHelp = showHelpState,             // Pass shared state
-                mazeCells = mazeCellsState.value,
-                mazeType = mazeTypeState.value,
-                cellSize = selectedSizeState.value,
-                optionalColor = optionalColorState.value,
-                regenerateMaze = { submitMazeRequest() },
-                moveAction = { direction -> performMove(direction) },
-                cellSizes = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, LocalContext.current),
-                toggleHeatMap = {
-                    showHeatMapState.value = !showHeatMapState.value  // Update shared state
-                    if (showHeatMapState.value) {
-                        selectedPaletteState.value = randomPaletteExcluding(selectedPaletteState.value, allPalettes)
-                        defaultBackgroundColorState.value = randomDefaultExcluding(defaultBackgroundColorState.value, CellColors.defaultBackgroundColors)
-                    }
-                },
-                cleanupMazeData = { cleanupMazeData() }
-            )
-        } else {
-            MazeRequestScreen(
-                mazeCells = mazeCellsState,           // Pass shared state
-                mazeGenerated = mazeGeneratedState,   // Pass shared state
-                mazeType = mazeTypeState,             // Pass shared state
-                selectedSize = selectedSizeState,     // Pass shared state
-                selectedMazeType = selectedMazeTypeState, // Pass shared state
-                selectedAlgorithm = selectedAlgorithmState, // Pass shared state
-                captureSteps = captureStepsState,     // Pass shared state
-                submitMazeRequest = { submitMazeRequest() }
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            isGeneratingMazeState.value -> {
+                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
+            isAnimatingGenerationState.value -> {
+                MazeGenerationAnimationScreen(
+                    generationSteps = generationStepsState.value,
+                    mazeType = mazeTypeState.value,
+                    cellSize = selectedSizeState.value,
+                    isAnimatingGeneration = isAnimatingGenerationState,
+                    mazeGenerated = mazeGeneratedState,
+                    showSolution = showSolutionState,
+                    showHeatMap = showHeatMapState,
+                    showControls = showControlsState,
+                    selectedPalette = selectedPaletteState,
+                    defaultBackground = defaultBackgroundColorState,
+                    showHelp = showHelpState,
+                    mazeID = mazeIDState.value,
+                    currentGrid = currentGridState.value,
+                    regenerateMaze = { submitMazeRequest() },
+                    cleanupMazeData = { cleanupMazeData() },
+                    cellSizes = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, LocalContext.current),
+                    optionalColor = optionalColorState.value
+                )
+            }
+            mazeGeneratedState.value -> {
+                MazeRenderScreen(
+                    mazeGenerated = mazeGeneratedState,
+                    showSolution = showSolutionState,
+                    showHeatMap = showHeatMapState,
+                    showControls = showControlsState,
+                    padOffset = padOffsetState,
+                    selectedPalette = selectedPaletteState,
+                    mazeID = mazeIDState.value,
+                    defaultBackground = defaultBackgroundColorState,
+                    showHelp = showHelpState,
+                    mazeCells = mazeCellsState.value,
+                    mazeType = mazeTypeState.value,
+                    cellSize = selectedSizeState.value,
+                    optionalColor = optionalColorState.value,
+                    regenerateMaze = { submitMazeRequest() },
+                    moveAction = { direction -> performMove(direction) },
+                    cellSizes = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, LocalContext.current),
+                    toggleHeatMap = {
+                        showHeatMapState.value = !showHeatMapState.value
+                        if (showHeatMapState.value) {
+                            selectedPaletteState.value = randomPaletteExcluding(selectedPaletteState.value, allPalettes)
+                            defaultBackgroundColorState.value = randomDefaultExcluding(defaultBackgroundColorState.value, CellColors.defaultBackgroundColors)
+                        }
+                    },
+                    cleanupMazeData = { cleanupMazeData() },
+                    showCelebration = showCelebrationState
+                )
+            }
+            else -> {
+                MazeRequestScreen(
+                    mazeCells = mazeCellsState,
+                    mazeGenerated = mazeGeneratedState,
+                    mazeType = mazeTypeState,
+                    selectedSize = selectedSizeState,
+                    selectedMazeType = selectedMazeTypeState,
+                    selectedAlgorithm = selectedAlgorithmState,
+                    captureSteps = captureStepsState,
+                    submitMazeRequest = { submitMazeRequest() }
+                )
+            }
         }
 
         if (isLoadingState.value) {
@@ -585,8 +503,7 @@ fun ContentScreen() {
             Text("Help Modal Placeholder") // TODO: Implement HelpModalScreen
         }
         if (showCelebrationState.value) {
-            Text("Celebration Placeholder") // TODO: Implement SparkleScreen
+            SparkleScreen(count = 25, totalDuration = 3f)
         }
     }
 }
-
