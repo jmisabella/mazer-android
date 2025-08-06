@@ -92,6 +92,13 @@ fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: Cel
 
             min(cellFromWidth, cellFromHeight)
         }
+        MazeType.RHOMBIC -> {
+            val factorW = (cols.toFloat() + 1f) * sqrt(2f) / 2f
+            val factorH = (rows.toFloat() + 1f) * sqrt(2f) / 2f
+            val cellFromWidth = screenWidthDp / factorW
+            val cellFromHeight = availableHeightDp / factorH
+            min(cellFromWidth, cellFromHeight)
+        }
         MazeType.UPSILON -> {
             val spacingFactor = 2f - sqrt(2f) // ≈0.5858
             val effectiveCols = cols.toFloat() - spacingFactor * (cols - 1).toFloat()

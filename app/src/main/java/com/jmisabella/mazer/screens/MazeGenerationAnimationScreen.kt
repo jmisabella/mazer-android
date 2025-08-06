@@ -34,6 +34,7 @@ import com.jmisabella.mazer.layout.navigationMenuVerticalAdjustment
 import com.jmisabella.mazer.models.*
 import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.RhombicMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.UpsilonMazeScreen
 import kotlinx.coroutines.delay
@@ -192,6 +193,15 @@ fun MazeGenerationAnimationScreen(
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,
                             selectedPalette = selectedPalette.value,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
+                        MazeType.RHOMBIC -> RhombicMazeScreen(
+                            selectedPalette = selectedPalette,
+                            cells = currentCells,
+                            cellSize = cellSizeValue,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
