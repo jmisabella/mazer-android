@@ -288,17 +288,6 @@ fun MazeRenderScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
-//                        MazeType.UPSILON -> UpsilonMazeScreen(
-//                            cells = mazeCells,
-//                            squareSize = cellSizeValue * (sqrt(2f) - 1f),
-//                            octagonSize = cellSizeValue,
-//                            showSolution = showSolution.value,
-//                            showHeatMap = showHeatMap.value,
-//                            selectedPalette = selectedPalette.value,
-//                            maxDistance = maxDistance,
-//                            defaultBackgroundColor = defaultBackground.value,
-//                            optionalColor = optionalColor
-//                        )
                         else -> Text("Unsupported maze type")
                     }
                 }

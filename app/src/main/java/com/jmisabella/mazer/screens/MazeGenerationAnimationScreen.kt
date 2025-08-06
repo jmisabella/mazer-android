@@ -35,6 +35,7 @@ import com.jmisabella.mazer.models.*
 import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.UpsilonMazeScreen
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -194,7 +195,17 @@ fun MazeGenerationAnimationScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
-
+                        MazeType.UPSILON -> UpsilonMazeScreen(
+                            cells = currentCells,
+                            squareSize = cellSizes.square,
+                            octagonSize = cellSizes.octagon,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
+                            maxDistance = maxDistance,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
                         else -> Text("Unsupported maze type")
                     }
                 }
