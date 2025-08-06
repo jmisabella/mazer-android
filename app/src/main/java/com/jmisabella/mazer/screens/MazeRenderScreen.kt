@@ -45,6 +45,7 @@ import com.jmisabella.mazer.screens.directioncontrols.FourWayDiagonalControlScre
 import com.jmisabella.mazer.screens.mazecomponents.DeltaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.OrthogonalMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
+import com.jmisabella.mazer.screens.mazecomponents.UpsilonMazeScreen
 import kotlin.math.*
 
 fun colorMatrixSaturation(saturation: Float): ColorMatrix {
@@ -276,6 +277,17 @@ fun MazeRenderScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
+                        MazeType.UPSILON -> UpsilonMazeScreen(
+                            cells = mazeCells,
+                            squareSize = cellSizes.square,
+                            octagonSize = cellSizes.octagon,
+                            showSolution = showSolution.value,
+                            showHeatMap = showHeatMap.value,
+                            selectedPalette = selectedPalette.value,
+                            maxDistance = maxDistance,
+                            defaultBackgroundColor = defaultBackground.value,
+                            optionalColor = optionalColor
+                        )
                         else -> Text("Unsupported maze type")
                     }
                 }
@@ -302,6 +314,7 @@ fun MazeRenderScreen(
                             MazeType.ORTHOGONAL -> FourWayControlScreen(performMove)
                             MazeType.SIGMA -> FourWayDiagonalControlScreen(performMove)
                             MazeType.DELTA -> EightWayControlScreen(performMove)
+                            MazeType.UPSILON -> EightWayControlScreen(performMove)
                             else -> Text("Controls not available for this maze type")
                         }
                     }
