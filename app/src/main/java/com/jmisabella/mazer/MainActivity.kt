@@ -189,12 +189,12 @@ fun ContentScreen() {
                 val screenW = metrics.widthPixels / metrics.density
                 val isSmallDevice = screenH <= 667
 
-                val perSidePad: Float = when (selectedMazeTypeState.value) {
-                    MazeType.ORTHOGONAL -> 20f
+                val perSidePad: Float = when (selectedMazeTypeState.value) { MazeType.ORTHOGONAL -> 20f
                     MazeType.UPSILON -> 12f
-                    else -> if (isSmallDevice) 50f else 100f
+                    MazeType.DELTA -> 20f
+                    MazeType.RHOMBIC -> 20f
+                    MazeType.SIGMA -> if (isSmallDevice) 50f else 100f
                 }
-
                 val totalVerticalPadding = perSidePad * 2
                 val controlArea = 80f
                 val availableH = screenH - controlArea - totalVerticalPadding
@@ -210,15 +210,24 @@ fun ContentScreen() {
                 var finalWidth: Int
                 var finalHeight: Int
 
+//                if (selectedMazeTypeState.value == MazeType.RHOMBIC) {
+//                    val s = squareCellSize
+//                    val diag = s * sqrt(2f)
+//                    val pitch = diag * 0.5f
+//                    finalWidth = maxOf(1, floor(screenW / diag).toInt())
+//                    finalHeight = maxOf(1, floor(drawableH / pitch).toInt())
+//                } else if (selectedMazeTypeState.value == MazeType.DELTA) {
+//                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
+//                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
                 if (selectedMazeTypeState.value == MazeType.RHOMBIC) {
-                    val s = squareCellSize
-                    val diag = s * sqrt(2f)
-                    val pitch = diag * 0.5f
-                    finalWidth = maxOf(1, floor(screenW / diag).toInt())
-                    finalHeight = maxOf(1, floor(drawableH / pitch).toInt())
+                    val diag = cellSize * sqrt(2f)
+                    finalWidth = maxOf(1, floor(2.0 * screenW / diag - 1.0).toInt())
+                    finalHeight = maxOf(1, floor(2.0 * drawableH / diag - 1.0).toInt())
                 } else if (selectedMazeTypeState.value == MazeType.DELTA) {
-                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
-                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
+//                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
+//                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
+                    finalWidth = maxOf(1, floor(2.0 * screenW / cellSize - 1.0).toInt())
+                    finalHeight = maxOf(1, floor(2.0 * drawableH / (cellSize * sqrt(3f)) - 0.0001).toInt()) // Minor epsilon to avoid floating-point overflow
                 } else {
                     finalWidth = if (selectedMazeTypeState.value == MazeType.SIGMA) maxWidth / 3 else maxWidth
                     finalHeight = if (selectedMazeTypeState.value == MazeType.SIGMA) maxHeightRows / 3 else maxHeightRows
