@@ -26,6 +26,7 @@ import com.jmisabella.mazer.screens.MazeRenderScreen
 import com.jmisabella.mazer.screens.MazeRequestScreen
 import com.jmisabella.mazer.ui.theme.MazerTheme
 import com.jmisabella.mazer.layout.computeCellSizes
+import com.jmisabella.mazer.screens.HelpModal
 import com.jmisabella.mazer.screens.MazeGenerationAnimationScreen
 import com.jmisabella.mazer.screens.effects.LoadingOverlay
 import com.jmisabella.mazer.screens.effects.SparkleScreen
@@ -509,7 +510,7 @@ fun ContentScreen() {
             LoadingOverlay(algorithm = selectedAlgorithmState.value)
         }
         if (showHelpState.value) {
-            Text("Help Modal Placeholder") // TODO: Implement HelpModalScreen
+            HelpModal(onDismiss = { showHelpState.value = false })
         }
         if (showCelebrationState.value) {
             SparkleScreen(count = 25, totalDuration = 3f)
