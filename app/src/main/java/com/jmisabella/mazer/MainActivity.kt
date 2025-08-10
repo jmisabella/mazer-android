@@ -72,7 +72,12 @@ fun ContentScreen() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
+    DisposableEffect(toneGenerator) {
+        onDispose {
+            toneGenerator.release()
+        }
+    }
 
     // State declarations
     val ffiIntegrationTestResultState = remember { mutableStateOf(0) }
