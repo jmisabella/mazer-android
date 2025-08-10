@@ -1,47 +1,46 @@
 package com.jmisabella.mazer.screens.directioncontrols
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FourWayDiagonalControlScreen(performMove: (String) -> Unit) {
-    Box(
+fun FourWayDiagonalControlScreen(moveAction: (String) -> Unit) {
+    val isDarkTheme = isSystemInDarkTheme()
+    val alpha = if (isDarkTheme) 0.6f else 0.75f
+    Column(
         modifier = Modifier
-            .padding(12.dp)
-            .background(Color.White.copy(alpha = 0.8f), shape = RoundedCornerShape(12.dp))
-            .shadow(4.dp)
-            .size(120.dp)
+            .background(MaterialTheme.colorScheme.background.copy(alpha = alpha), RoundedCornerShape(32.dp))
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box {
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            DPadButton(
+                systemImage = "arrow.up.left",
+                action = "UpperLeft",
+                performMove = moveAction
+            )
             DPadButton(
                 systemImage = "arrow.up.right",
                 action = "UpperRight",
-                performMove = performMove,
-                modifier = Modifier.offset(x = 28.dp, y = (-28).dp)
+                performMove = moveAction
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            DPadButton(
+                systemImage = "arrow.down.left",
+                action = "LowerLeft",
+                performMove = moveAction
             )
             DPadButton(
                 systemImage = "arrow.down.right",
                 action = "LowerRight",
-                performMove = performMove,
-                modifier = Modifier.offset(x = 28.dp, y = 28.dp)
-            )
-            DPadButton(
-                systemImage = "arrow.down.left",
-                action = "LowerLeft",
-                performMove = performMove,
-                modifier = Modifier.offset(x = (-28).dp, y = 28.dp)
-            )
-            DPadButton(
-                systemImage = "arrow.up.left",
-                action = "UpperLeft",
-                performMove = performMove,
-                modifier = Modifier.offset(x = (-28).dp, y = (-28).dp)
+                performMove = moveAction
             )
         }
     }
