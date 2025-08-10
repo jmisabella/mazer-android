@@ -1,6 +1,7 @@
 package com.jmisabella.mazer.screens.directioncontrols
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -10,9 +11,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FourWayDiagonalControlScreen(moveAction: (String) -> Unit) {
+    val isDarkTheme = isSystemInDarkTheme()
+    val alpha = if (isDarkTheme) 0.6f else 0.75f
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6f), RoundedCornerShape(32.dp))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = alpha), RoundedCornerShape(32.dp))
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {

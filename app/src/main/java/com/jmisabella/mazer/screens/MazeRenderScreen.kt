@@ -339,7 +339,7 @@ fun MazeRenderScreen(
                     ) {
                         when (mazeType) {
                             MazeType.ORTHOGONAL -> FourWayControlScreen(performMove)
-                            MazeType.SIGMA -> FourWayDiagonalControlScreen(performMove)
+                            MazeType.SIGMA -> EightWayControlScreen(performMove)
                             MazeType.DELTA -> EightWayControlScreen(performMove)
                             MazeType.RHOMBIC -> FourWayDiagonalControlScreen(performMove)
                             MazeType.UPSILON -> EightWayControlScreen(performMove)
