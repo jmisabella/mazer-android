@@ -98,7 +98,7 @@ fun DeltaMazeScreen(
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter
     ) {
         Box(
             modifier = Modifier
