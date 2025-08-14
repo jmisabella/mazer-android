@@ -91,7 +91,7 @@ fun SigmaMazeScreen(
 
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastFeedbackTime >= minFeedbackInterval) {
-                    toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+//                    toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
                     vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
                     lastFeedbackTime = currentTime
                 }

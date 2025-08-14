@@ -88,7 +88,7 @@ fun OrthogonalMazeScreen(
 
             pathCoords.forEach { coord ->
                 delay(interval)
-                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+//                toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
                 vibrator.vibrate(
                     VibrationEffect.createOneShot(
                         50,

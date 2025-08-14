@@ -80,7 +80,7 @@ fun MazeRenderScreen(
 ) {
     val context = LocalContext.current
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
+    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 30) }
     DisposableEffect(toneGenerator) {
         onDispose {
             toneGenerator.release()
@@ -95,7 +95,7 @@ fun MazeRenderScreen(
     val performMove: (String) -> Unit = { dir ->
         showSolution.value = false
         if (moveAction(dir)) {
-            toneGenerator.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 200)
+//            toneGenerator.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 200)
         }
     }
 
@@ -177,7 +177,10 @@ fun MazeRenderScreen(
         val density = LocalDensity.current.density
         BoxWithConstraints(
             modifier = Modifier
-                .fillMaxSize()
+//                .fillMaxSize()
+                .fillMaxWidth() //+
+                .weight(1f) //+
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)) //++
                 .padding(bottom = 20.dp)
         ) {
             Box(
@@ -409,7 +412,7 @@ fun MazeRenderScreen(
             showHelp.value = true
             sharedPrefs.edit().putBoolean(key, true).apply()
         }
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+//        toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 200)
     }
 }
 

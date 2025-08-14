@@ -87,7 +87,7 @@ fun MazeGenerationAnimationScreen(
     fun completeAnimation() {
         isAnimatingGeneration.value = false
         mazeGenerated.value = true
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
         defaultBackground.value = randomDefaultExcluding(defaultBackground.value, CellColors.defaultBackgroundColors)
     }
 
@@ -159,7 +159,10 @@ fun MazeGenerationAnimationScreen(
 
         BoxWithConstraints(
             modifier = Modifier
-                .fillMaxSize()
+//                .fillMaxSize()
+                .fillMaxWidth() //+
+                .weight(1f) //+
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)) //++
                 .padding(bottom = 20.dp) // Added bottom padding to prevent cutoff at curved corners
         ) {
             if (currentStepIndex < generationSteps.size) {
