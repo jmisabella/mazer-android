@@ -183,6 +183,9 @@ fun MazeRenderScreen(
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)) //++
                 .padding(bottom = 20.dp)
         ) {
+            val localDensity = LocalDensity.current.density
+            val availableHeightDp = constraints.maxHeight.toFloat() / localDensity
+            val rows = (mazeCells.maxOfOrNull { it.y } ?: 0) + 1
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -204,7 +207,8 @@ fun MazeRenderScreen(
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,
                             defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
+                            optionalColor = optionalColor,
+                            cellSize = cellSize
                         )
                         MazeType.DELTA -> DeltaMazeScreen(
                             cells = mazeCells,
@@ -234,17 +238,22 @@ fun MazeRenderScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
-                        MazeType.UPSILON -> UpsilonMazeScreen(
-                            cells = mazeCells,
-                            squareSize = cellSizes.square,
-                            octagonSize = cellSizes.octagon,
-                            showSolution = showSolution.value,
-                            showHeatMap = showHeatMap.value,
-                            selectedPalette = selectedPalette.value,
-                            maxDistance = maxDistance,
-                            defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
-                        )
+                        MazeType.UPSILON -> {
+//                            val fitOctagon = availableHeightDp / rows.toFloat()
+//                            val octagon = min(cellSizes.octagon, fitOctagon)
+//                            val square = octagon / sqrt(2f).toFloat()
+                            UpsilonMazeScreen(
+                                cells = mazeCells,
+                                squareSize = cellSizes.square,
+                                octagonSize = cellSizes.octagon,
+                                showSolution = showSolution.value,
+                                showHeatMap = showHeatMap.value,
+                                selectedPalette = selectedPalette.value,
+                                maxDistance = maxDistance,
+                                defaultBackgroundColor = defaultBackground.value,
+                                optionalColor = optionalColor
+                            )
+                        }
                         else -> Text("Unsupported maze type")
                     }
                 }
