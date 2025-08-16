@@ -144,7 +144,10 @@ fun MazeRequestScreen(
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(size.label)
+                            Text(
+                                size.label,
+                                fontSize = (12 * fontScale).sp
+                            )
                         }
                     }
                 }
@@ -168,7 +171,10 @@ fun MazeRequestScreen(
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(type.displayName)
+                        Text(
+                            type.displayName,
+                            fontSize = (12 * fontScale).sp
+                        )
                     }
                 }
             }
