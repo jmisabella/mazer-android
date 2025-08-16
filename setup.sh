@@ -29,7 +29,7 @@ case "$ARG" in
         TARGETS=("x86_64-linux-android" "aarch64-linux-android")
         ;;
     RELEASE)
-        TARGETS=("armeabi-v7a" "arm64-v8a")
+        TARGETS=("armv7-linux-androideabi" "aarch64-linux-android")
         ;;
     *)
         echo "Error: Unexpected argument '$1'. Expected DEVELOP or RELEASE."
@@ -116,7 +116,22 @@ fi
 # Build mazer library for Android targets using cargo-ndk
 echo "Building mazer library for targets: ${TARGETS[*]}..."
 for TARGET in "${TARGETS[@]}"; do
-    cargo ndk -t "$TARGET" build --release
+    case "$TARGET" in
+        "x86_64-linux-android")
+            ABI="x86_64"
+            ;;
+        "aarch64-linux-android")
+            ABI="arm64-v8a"
+            ;;
+        "armv7-linux-androideabi")
+            ABI="armeabi-v7a"
+            ;;
+        *)
+            echo "Unknown target: $TARGET"
+            continue
+            ;;
+    esac
+    cargo ndk -t "$ABI" build --release
 done
 
 # Copy include/mazer.h to mazer-android/ for JNI integration
@@ -138,7 +153,7 @@ for TARGET in "${TARGETS[@]}"; do
         "aarch64-linux-android")
             ABI="arm64-v8a"
             ;;
-        "armeabi-v7a")
+        "armv7-linux-androideabi")
             ABI="armeabi-v7a"
             ;;
         *)

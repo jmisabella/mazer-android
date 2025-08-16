@@ -1,5 +1,6 @@
 package com.jmisabella.mazer
 
+import android.os.Build
 import android.content.Context
 import android.media.AudioManager
 import android.media.ToneGenerator
@@ -72,7 +73,12 @@ fun ContentScreen() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 30) }
+    DisposableEffect(toneGenerator) {
+        onDispose {
+            toneGenerator.release()
+        }
+    }
 
     // State declarations
     val ffiIntegrationTestResultState = remember { mutableStateOf(0) }
@@ -186,18 +192,24 @@ fun ContentScreen() {
 
                 val (squareCellSize, octagonCellSize) = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, context)
                 val metrics = context.resources.displayMetrics
-                val screenH = metrics.heightPixels / metrics.density
-                val screenW = metrics.widthPixels / metrics.density
+                val density = metrics.density
+                val screenH = metrics.heightPixels / density
+                val screenW = metrics.widthPixels / density
                 val isSmallDevice = screenH <= 667
 
-                val perSidePad: Float = when (selectedMazeTypeState.value) { MazeType.ORTHOGONAL -> 20f
+                val perSidePad: Float = when (selectedMazeTypeState.value) {
+                    MazeType.ORTHOGONAL -> 20f
                     MazeType.UPSILON -> 12f
                     MazeType.DELTA -> 20f
                     MazeType.RHOMBIC -> 20f
-                    MazeType.SIGMA -> if (isSmallDevice) 50f else 100f
+                    MazeType.SIGMA -> if (Build.VERSION.SDK_INT <= 34) {
+                        if (isSmallDevice) 30f else 60f // Reduced padding for Android 14 to add rows
+                    } else {
+                        if (isSmallDevice) 50f else 100f
+                    }
                 }
                 val totalVerticalPadding = perSidePad * 2
-                val controlArea = 80f
+                val controlArea = if (Build.VERSION.SDK_INT <= 34) 96f else 80f // Add gesture padding for Android 14
                 val availableH = screenH - controlArea - totalVerticalPadding
                 val drawableH = availableH
 
@@ -211,22 +223,11 @@ fun ContentScreen() {
                 var finalWidth: Int
                 var finalHeight: Int
 
-//                if (selectedMazeTypeState.value == MazeType.RHOMBIC) {
-//                    val s = squareCellSize
-//                    val diag = s * sqrt(2f)
-//                    val pitch = diag * 0.5f
-//                    finalWidth = maxOf(1, floor(screenW / diag).toInt())
-//                    finalHeight = maxOf(1, floor(drawableH / pitch).toInt())
-//                } else if (selectedMazeTypeState.value == MazeType.DELTA) {
-//                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
-//                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
                 if (selectedMazeTypeState.value == MazeType.RHOMBIC) {
                     val diag = cellSize * sqrt(2f)
                     finalWidth = maxOf(1, floor(2.0 * screenW / diag - 1.0).toInt())
                     finalHeight = maxOf(1, floor(2.0 * drawableH / diag - 1.0).toInt())
                 } else if (selectedMazeTypeState.value == MazeType.DELTA) {
-//                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
-//                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
                     finalWidth = maxOf(1, floor(2.0 * screenW / cellSize - 1.0).toInt())
                     finalHeight = maxOf(1, floor(2.0 * drawableH / (cellSize * sqrt(3f)) - 0.0001).toInt()) // Minor epsilon to avoid floating-point overflow
                 } else {
@@ -352,10 +353,196 @@ fun ContentScreen() {
         }
     }
 
+//    fun submitMazeRequest() {
+//        coroutineScope.launch {
+//            println("FFI integration test result: ${MazerNative.mazerFfiIntegrationTest()}")
+//            isLoadingState.value = true
+//            withContext(Dispatchers.IO) {
+//                currentGridState.value?.let { gridPtr ->
+//                    MazerNative.destroyMaze(gridPtr)
+//                    currentGridState.value = null
+//                }
+//
+//                val (squareCellSize, octagonCellSize) = computeCellSizes(selectedMazeTypeState.value, selectedSizeState.value, context)
+//                val metrics = context.resources.displayMetrics
+//                val screenH = metrics.heightPixels / metrics.density
+//                val screenW = metrics.widthPixels / metrics.density
+//                val isSmallDevice = screenH <= 667
+//
+//                val perSidePad: Float = when (selectedMazeTypeState.value) { MazeType.ORTHOGONAL -> 20f
+//                    MazeType.UPSILON -> 12f
+//                    MazeType.DELTA -> 20f
+//                    MazeType.RHOMBIC -> 20f
+//                    MazeType.SIGMA -> if (isSmallDevice) 50f else 100f
+//                }
+//                val totalVerticalPadding = perSidePad * 2
+//                val controlArea = 80f
+//                val availableH = screenH - controlArea - totalVerticalPadding
+//                val drawableH = availableH
+//
+//                val cellSize = if (selectedMazeTypeState.value == MazeType.UPSILON) octagonCellSize else squareCellSize
+//                val spacing = if (selectedMazeTypeState.value == MazeType.UPSILON) (sqrt(2f) * 0.5f) * octagonCellSize else cellSize
+//                val rowHeight = if (selectedMazeTypeState.value == MazeType.UPSILON) octagonCellSize * (sqrt(2f) * 0.5f) else cellSize
+//
+//                val maxHeightRows = maxOf(1, floor(availableH / rowHeight).toInt())
+//                val maxWidth = maxOf(1, floor(screenW / spacing).toInt())
+//
+//                var finalWidth: Int
+//                var finalHeight: Int
+//
+////                if (selectedMazeTypeState.value == MazeType.RHOMBIC) {
+////                    val s = squareCellSize
+////                    val diag = s * sqrt(2f)
+////                    val pitch = diag * 0.5f
+////                    finalWidth = maxOf(1, floor(screenW / diag).toInt())
+////                    finalHeight = maxOf(1, floor(drawableH / pitch).toInt())
+////                } else if (selectedMazeTypeState.value == MazeType.DELTA) {
+////                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
+////                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
+//                if (selectedMazeTypeState.value == MazeType.RHOMBIC) {
+//                    val diag = cellSize * sqrt(2f)
+//                    finalWidth = maxOf(1, floor(2.0 * screenW / diag - 1.0).toInt())
+//                    finalHeight = maxOf(1, floor(2.0 * drawableH / diag - 1.0).toInt())
+//                } else if (selectedMazeTypeState.value == MazeType.DELTA) {
+////                    finalWidth = maxOf(1, floor(screenW / (cellSize * 0.75f)).toInt())
+////                    finalHeight = maxOf(1, floor(drawableH / (cellSize * sqrt(3f) / 2f)).toInt())
+//                    finalWidth = maxOf(1, floor(2.0 * screenW / cellSize - 1.0).toInt())
+//                    finalHeight = maxOf(1, floor(2.0 * drawableH / (cellSize * sqrt(3f)) - 0.0001).toInt()) // Minor epsilon to avoid floating-point overflow
+//                } else {
+//                    finalWidth = if (selectedMazeTypeState.value == MazeType.SIGMA) maxWidth / 3 else maxWidth
+//                    finalHeight = if (selectedMazeTypeState.value == MazeType.SIGMA) maxHeightRows / 3 else maxHeightRows
+//                }
+//
+//                if (captureStepsState.value && (finalWidth > 100 || finalHeight > 100)) {
+//                    withContext(Dispatchers.Main) {
+//                        errorMessageState.value = "Show Maze Generation is only available for mazes with width and height ≤ 100."
+//                        isLoadingState.value = false
+//                    }
+//                    return@withContext
+//                }
+//
+//                val mazeRequest = MazeRequest(
+//                    mazeType = selectedMazeTypeState.value.ffiName,
+//                    width = finalWidth,
+//                    height = finalHeight,
+//                    algorithm = selectedAlgorithmState.value.ffiName,
+//                    captureSteps = captureStepsState.value
+//                )
+//
+//                val jsonString = Json.encodeToString(mazeRequest)
+//                println("Valid JSON: $jsonString")
+//
+//                val gridPtr = MazerNative.generateMaze(jsonString)
+//                if (gridPtr == 0L) {
+//                    println("Failed to generate maze")
+//                    withContext(Dispatchers.Main) {
+//                        errorMessageState.value = "Failed to generate maze."
+//                        isLoadingState.value = false
+//                    }
+//                    return@withContext
+//                }
+//
+//                currentGridState.value = gridPtr
+//
+//                val cellsPtr = MazerNative.getCells(gridPtr)
+//                if (cellsPtr == null) {
+//                    println("Error occurred getting cells from grid pointer!")
+//                    withContext(Dispatchers.Main) {
+//                        errorMessageState.value = "Failed to retrieve cells."
+//                        isLoadingState.value = false
+//                    }
+//                    return@withContext
+//                }
+//
+//                println("mapping cells to FFI cells...")
+//                val cells = cellsPtr.map { ffiCell ->
+//                    MazeCell(
+//                        x = ffiCell.x.toInt(),
+//                        y = ffiCell.y.toInt(),
+//                        mazeType = ffiCell.maze_type ?: "",
+//                        linked = ffiCell.linked?.toList() ?: emptyList(),
+//                        distance = ffiCell.distance,
+//                        isStart = ffiCell.is_start,
+//                        isGoal = ffiCell.is_goal,
+//                        isActive = ffiCell.is_active,
+//                        isVisited = ffiCell.is_visited,
+//                        hasBeenVisited = ffiCell.has_been_visited,
+//                        onSolutionPath = ffiCell.on_solution_path,
+//                        orientation = ffiCell.orientation ?: "",
+//                        isSquare = ffiCell.is_square
+//                    )
+//                }
+//
+//                val cellCount = cells.count()
+//                println("Cells count: $cellCount")
+//
+//                var steps: List<List<MazeCell>> = emptyList()
+//                if (captureStepsState.value) {
+//                    val stepsCount = MazerNative.getGenerationStepsCount(gridPtr)
+//                    steps = (0 until stepsCount).mapNotNull { stepIndex ->
+//                        val stepCellsPtr = MazerNative.getGenerationStepCells(gridPtr, stepIndex)
+//                        if (stepCellsPtr == null) {
+//                            withContext(Dispatchers.Main) {
+//                                errorMessageState.value = "Failed to retrieve generation step cells."
+//                                isLoadingState.value = false
+//                            }
+//                            null
+//                        } else {
+//                            val stepCells = stepCellsPtr.map { ffiCell ->
+//                                MazeCell(
+//                                    x = ffiCell.x.toInt(),
+//                                    y = ffiCell.y.toInt(),
+//                                    mazeType = ffiCell.maze_type ?: "",
+//                                    linked = ffiCell.linked?.toList() ?: emptyList(),
+//                                    distance = ffiCell.distance,
+//                                    isStart = ffiCell.is_start,
+//                                    isGoal = ffiCell.is_goal,
+//                                    isActive = ffiCell.is_active,
+//                                    isVisited = ffiCell.is_visited,
+//                                    hasBeenVisited = ffiCell.has_been_visited,
+//                                    onSolutionPath = ffiCell.on_solution_path,
+//                                    orientation = ffiCell.orientation ?: "",
+//                                    isSquare = ffiCell.is_square
+//                                )
+//                            }
+//                            stepCells
+//                        }
+//                    }
+//                }
+//
+//                withContext(Dispatchers.Main) {
+//                    mazeCellsState.value = cells
+//                    mazeTypeState.value = MazeType.fromFFIName(cells.firstOrNull()?.mazeType) ?: MazeType.ORTHOGONAL
+//                    if (captureStepsState.value) {
+//                        generationStepsState.value = steps
+//                        isAnimatingGenerationState.value = true
+//                    } else {
+//                        mazeGeneratedState.value = true
+//                    }
+//                    optionalColorState.value = if ((0..1).random() == 1) {
+//                        listOf(Color.Magenta, Color.Gray, Color.Yellow, Color.Blue, Color(0xFFA200FF), Color(0xFFFF9500)).randomOrNull()
+//                    } else null
+//                    isLoadingState.value = false
+//                    errorMessageState.value = null
+//                    selectedPaletteState.value = randomPaletteExcluding(selectedPaletteState.value, allPalettes)
+//                    defaultBackgroundColorState.value = randomDefaultExcluding(defaultBackgroundColorState.value, CellColors.defaultBackgroundColors)
+//                }
+//            }
+//        }
+//    }
+
     fun celebrateVictory() {
         showCelebrationState.value = true
         captureStepsState.value = false
-        vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+
+//        vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+        if (vibrator.hasAmplitudeControl()) {
+            vibrator.vibrate(VibrationEffect.createOneShot(200, 128))
+        } else {
+            // Fallback for devices without amplitude control
+            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
+
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 200)
         coroutineScope.launch {
             kotlinx.coroutines.delay(2000)
@@ -401,8 +588,12 @@ fun ContentScreen() {
 
         if (newGridPtr == null || newGridPtr == 0L) return false
 
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-        vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+        if (vibrator.hasAmplitudeControl()) {
+            vibrator.vibrate(VibrationEffect.createOneShot(30, 128))  // 30ms at half strength
+        } else {
+            // Fallback for devices without amplitude control
+            vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
 
         currentGridState.value = newGridPtr
         val cellsPtr = MazerNative.getCells(newGridPtr)

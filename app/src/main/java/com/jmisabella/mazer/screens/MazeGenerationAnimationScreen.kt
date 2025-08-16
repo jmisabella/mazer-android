@@ -38,6 +38,8 @@ import com.jmisabella.mazer.screens.mazecomponents.RhombicMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.SigmaMazeScreen
 import com.jmisabella.mazer.screens.mazecomponents.UpsilonMazeScreen
 import kotlinx.coroutines.delay
+import kotlin.math.min
+import kotlin.math.sqrt
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -87,7 +89,7 @@ fun MazeGenerationAnimationScreen(
     fun completeAnimation() {
         isAnimatingGeneration.value = false
         mazeGenerated.value = true
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
+        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
         defaultBackground.value = randomDefaultExcluding(defaultBackground.value, CellColors.defaultBackgroundColors)
     }
 
@@ -159,11 +161,17 @@ fun MazeGenerationAnimationScreen(
 
         BoxWithConstraints(
             modifier = Modifier
-                .fillMaxSize()
+//                .fillMaxSize()
+                .fillMaxWidth() //+
+                .weight(1f) //+
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)) //++
                 .padding(bottom = 20.dp) // Added bottom padding to prevent cutoff at curved corners
         ) {
             if (currentStepIndex < generationSteps.size) {
                 val currentCells = generationSteps[currentStepIndex]
+                val localDensity = LocalDensity.current.density
+                val availableHeightDp = constraints.maxHeight.toFloat() / localDensity
+                val rows = (currentCells.maxOfOrNull { it.y } ?: 0) + 1
 
                 val mazeContent = @Composable {
                     val maxDistance = currentCells.maxOfOrNull { it.distance } ?: 1
@@ -175,8 +183,10 @@ fun MazeGenerationAnimationScreen(
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,
                             defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
+                            optionalColor = optionalColor,
+                            cellSize = cellSize
                         )
+
                         MazeType.DELTA -> DeltaMazeScreen(
                             cells = currentCells,
                             cellSize = cellSizeValue,
@@ -187,6 +197,7 @@ fun MazeGenerationAnimationScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
+
                         MazeType.SIGMA -> SigmaMazeScreen(
                             cells = currentCells,
                             cellSize = cellSizeValue,
@@ -196,6 +207,7 @@ fun MazeGenerationAnimationScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
+
                         MazeType.RHOMBIC -> RhombicMazeScreen(
                             selectedPalette = selectedPalette,
                             cells = currentCells,
@@ -205,17 +217,41 @@ fun MazeGenerationAnimationScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
-                        MazeType.UPSILON -> UpsilonMazeScreen(
-                            cells = currentCells,
-                            squareSize = cellSizes.square,
-                            octagonSize = cellSizes.octagon,
-                            showSolution = showSolution.value,
-                            showHeatMap = showHeatMap.value,
-                            selectedPalette = selectedPalette.value,
-                            maxDistance = maxDistance,
-                            defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
-                        )
+                        MazeType.UPSILON -> {
+                            val c = sqrt(2f) - 1f
+                            val f = (1f - c) / 2f
+                            val denom = rows - (rows - 1) * f
+                            val fitOctagon = availableHeightDp / denom
+                            val octagon = min(cellSizes.octagon, fitOctagon)
+                            val square = octagon * c
+                            UpsilonMazeScreen(
+                                cells = currentCells,
+                                squareSize = square,
+                                octagonSize = octagon,
+                                showSolution = showSolution.value,
+                                showHeatMap = showHeatMap.value,
+                                selectedPalette = selectedPalette.value,
+                                maxDistance = maxDistance,
+                                defaultBackgroundColor = defaultBackground.value,
+                                optionalColor = optionalColor
+                            )
+                        }
+//                        MazeType.UPSILON -> {
+////                            val fitOctagon = availableHeightDp / rows.toFloat()
+////                            val octagon = min(cellSizes.octagon, fitOctagon)
+////                            val square = octagon / sqrt(2f).toFloat()
+//                            UpsilonMazeScreen(
+//                                cells = currentCells,
+//                                squareSize = cellSizes.square,
+//                                octagonSize = cellSizes.octagon,
+//                                showSolution = showSolution.value,
+//                                showHeatMap = showHeatMap.value,
+//                                selectedPalette = selectedPalette.value,
+//                                maxDistance = maxDistance,
+//                                defaultBackgroundColor = defaultBackground.value,
+//                                optionalColor = optionalColor
+//                            )
+//                        }
                         else -> Text("Unsupported maze type")
                     }
                 }
