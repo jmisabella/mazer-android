@@ -122,9 +122,11 @@ fun UpsilonMazeScreen(
     }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
+        val totalMazeWidthPx = columns * spacingPx
+        val horizontalOffset = (size.width - totalMazeWidthPx) / 2f
         val uniqueWalls = mutableSetOf<Pair<Offset, Offset>>()
 
-        // Draw all backgrounds first (with translate for positioning)
+        // Collect unique wall segments (absolute rounded positions)
         for (cell in sortedCells) {
             val cellXPx = cell.x * spacingPx
             val cellYPx = cell.y * spacingPx
@@ -141,7 +143,7 @@ fun UpsilonMazeScreen(
                 optionalColor = optionalColor
             )
 
-            translate(cellXPx, cellYPx) {
+            translate(horizontalOffset + cellXPx, cellYPx) {
                 if (cell.isSquare) {
                     val inset = (octagonPx - squarePx) / 2f
                     drawRect(
@@ -159,9 +161,8 @@ fun UpsilonMazeScreen(
             }
         }
 
-        // Collect unique wall segments (absolute rounded positions)
         for (cell in sortedCells) {
-            val cellXPx = cell.x * spacingPx
+            val cellXPx = horizontalOffset + cell.x * spacingPx  // Add offset here
             val cellYPx = cell.y * spacingPx
             val pts = if (cell.isSquare) {
                 val i = (octagonPx - squarePx) / 2f
