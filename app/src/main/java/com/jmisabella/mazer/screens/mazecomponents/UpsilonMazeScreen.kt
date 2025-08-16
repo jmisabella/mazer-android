@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.graphicsLayer
 import com.jmisabella.mazer.layout.cellBackgroundColor
 import com.jmisabella.mazer.models.Coordinates
 import com.jmisabella.mazer.models.HeatMapPalette

@@ -167,7 +167,6 @@ fun MazeGenerationAnimationScreen(
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)) //++
                 .padding(bottom = 20.dp) // Added bottom padding to prevent cutoff at curved corners
         ) {
-
             if (currentStepIndex < generationSteps.size) {
                 val currentCells = generationSteps[currentStepIndex]
                 val localDensity = LocalDensity.current.density
@@ -218,15 +217,17 @@ fun MazeGenerationAnimationScreen(
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor
                         )
-
                         MazeType.UPSILON -> {
-//                            val fitOctagon = availableHeightDp / rows.toFloat()
-//                            val octagon = min(cellSizes.octagon, fitOctagon)
-//                            val square = octagon / sqrt(2f).toFloat()
+                            val c = sqrt(2f) - 1f
+                            val f = (1f - c) / 2f
+                            val denom = rows - (rows - 1) * f
+                            val fitOctagon = availableHeightDp / denom
+                            val octagon = min(cellSizes.octagon, fitOctagon)
+                            val square = octagon * c
                             UpsilonMazeScreen(
                                 cells = currentCells,
-                                squareSize = cellSizes.square,
-                                octagonSize = cellSizes.octagon,
+                                squareSize = square,
+                                octagonSize = octagon,
                                 showSolution = showSolution.value,
                                 showHeatMap = showHeatMap.value,
                                 selectedPalette = selectedPalette.value,
@@ -235,6 +236,22 @@ fun MazeGenerationAnimationScreen(
                                 optionalColor = optionalColor
                             )
                         }
+//                        MazeType.UPSILON -> {
+////                            val fitOctagon = availableHeightDp / rows.toFloat()
+////                            val octagon = min(cellSizes.octagon, fitOctagon)
+////                            val square = octagon / sqrt(2f).toFloat()
+//                            UpsilonMazeScreen(
+//                                cells = currentCells,
+//                                squareSize = cellSizes.square,
+//                                octagonSize = cellSizes.octagon,
+//                                showSolution = showSolution.value,
+//                                showHeatMap = showHeatMap.value,
+//                                selectedPalette = selectedPalette.value,
+//                                maxDistance = maxDistance,
+//                                defaultBackgroundColor = defaultBackground.value,
+//                                optionalColor = optionalColor
+//                            )
+//                        }
                         else -> Text("Unsupported maze type")
                     }
                 }
