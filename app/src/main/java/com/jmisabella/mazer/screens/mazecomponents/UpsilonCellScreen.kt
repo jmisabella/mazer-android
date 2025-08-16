@@ -29,10 +29,11 @@ fun UpsilonCell(
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
+    // convert dp→px once:
     val gridPx = with(density) { gridCellSize.dp.toPx() }
     val squarePx = with(density) { squareSize.dp.toPx() }
-    val overlapPx = gridPx / 20f
-    val strokePx = gridPx / 16f
+    val overlapPx = 1f // 1px bleed so your shapes butt up
+    val strokePx = gridPx / 12f // exactly as you had, but now in px
 
     Canvas(modifier = modifier.size(gridCellSize.dp)) {
         // 1) draw the background (either square or octagon)
@@ -50,9 +51,10 @@ fun UpsilonCell(
             )
             drawPath(path, fillColor, style = Fill)
         }
-
         // 2) draw the walls
+        // here you’ll need to recalc your “points” in px as well:
         val pts = if (isSquare) {
+            // 4 corners of your square, in px
             val i = (gridPx - squarePx) / 2f
             listOf(
                 Offset(i, i),
@@ -61,6 +63,7 @@ fun UpsilonCell(
                 Offset(i, i + squarePx)
             )
         } else {
+            // your 8 octagon vertices, using gridPx and k, in px
             val r = gridPx / 2f
             val cx = r; val cy = r
             val k = 2 * r / (2 + sqrt(2f))
@@ -75,15 +78,6 @@ fun UpsilonCell(
                 Offset(cx - r, cy - r + k)
             )
         }
-
-        // Round points to nearest pixel
-        val roundedPts = pts.map {
-            Offset(
-                it.x.roundToInt().toFloat(),
-                it.y.roundToInt().toFloat()
-            )
-        }
-
         val directions = if (isSquare) mapOf(
             "Up" to (0 to 1),
             "Right" to (1 to 2),
@@ -99,23 +93,16 @@ fun UpsilonCell(
             "Left" to (6 to 7),
             "UpperLeft" to (7 to 0)
         )
-
-        val passes = if (gridPx > 100f) 2 else 1  // Multiple passes for larger cells to fill any tiny antialiasing gaps
-
         for ((dir, pair) in directions) {
             if (!cell.linked.contains(dir)) {
-                val (startIdx, endIdx) = pair
-                val start = roundedPts[startIdx]
-                val end = roundedPts[endIdx]
-                repeat(passes) {
-                    drawLine(
-                        color = Color.Black,
-                        start = start,
-                        end = end,
-                        strokeWidth = strokePx,
-                        cap = StrokeCap.Butt  // Butt works better with rounding for gap handling
-                    )
-                }
+                val (a, b) = pair
+                drawLine(
+                    color = Color.Black,
+                    start = pts[a],
+                    end = pts[b],
+                    strokeWidth = strokePx,
+                    cap = StrokeCap.Butt
+                )
             }
         }
     }
@@ -134,7 +121,6 @@ fun UpsilonCell(
 //    val density = LocalDensity.current
 //    val gridPx = with(density) { gridCellSize.dp.toPx() }
 //    val squarePx = with(density) { squareSize.dp.toPx() }
-////    val overlapPx = gridPx / 24f
 //    val overlapPx = gridPx / 20f
 //    val strokePx = gridPx / 16f
 //
@@ -204,25 +190,24 @@ fun UpsilonCell(
 //            "UpperLeft" to (7 to 0)
 //        )
 //
-//        val passes = if (gridPx > 100f) 3 else 2  // More passes for larger cells to fill antialiasing
+//        val passes = if (gridPx > 100f) 2 else 1  // Multiple passes for larger cells to fill any tiny antialiasing gaps
 //
 //        for ((dir, pair) in directions) {
 //            if (!cell.linked.contains(dir)) {
 //                val (startIdx, endIdx) = pair
-//                val start = pts[startIdx]
-//                val end = pts[endIdx]
+//                val start = roundedPts[startIdx]
+//                val end = roundedPts[endIdx]
 //                repeat(passes) {
 //                    drawLine(
 //                        color = Color.Black,
 //                        start = start,
 //                        end = end,
 //                        strokeWidth = strokePx,
-//                        cap = StrokeCap.Square  // Changed for better edge coverage
+//                        cap = StrokeCap.Butt  // Butt works better with rounding for gap handling
 //                    )
 //                }
 //            }
 //        }
-//
 //    }
 //}
 
