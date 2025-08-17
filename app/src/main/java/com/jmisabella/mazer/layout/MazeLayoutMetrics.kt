@@ -15,31 +15,35 @@ fun adjustedCellSize(mazeType: MazeType, cellSize: CellSize, context: Context): 
     val screenSize = screenWidthDp to screenHeightDp
     val adjustment: Float = when (mazeType) {
         MazeType.DELTA -> when (cellSize) {
-            CellSize.TINY -> 1.6f
+//            CellSize.TINY -> 1.6f
             CellSize.SMALL -> 1.85f
             CellSize.MEDIUM -> 2.2f
             CellSize.LARGE -> 2.5f
         }
         MazeType.ORTHOGONAL -> when (cellSize) {
-            CellSize.TINY -> 1.2f
+//            CellSize.TINY -> 1.2f
             CellSize.SMALL -> 1.3f
             CellSize.MEDIUM -> 1.65f
             CellSize.LARGE -> 1.8f
         }
         MazeType.SIGMA -> when (cellSize) {
-            CellSize.TINY -> 0.63f
-            CellSize.SMALL -> 0.73f
+//            CellSize.TINY -> 0.63f
+//            CellSize.SMALL -> 0.73f
+//            CellSize.MEDIUM -> 0.85f
+//            CellSize.LARGE -> 1.1f
+//            CellSize.TINY -> 0.73f
+            CellSize.SMALL -> 0.8f
             CellSize.MEDIUM -> 0.85f
-            CellSize.LARGE -> 1.1f
+            CellSize.LARGE -> 0.9f
         }
         MazeType.UPSILON -> when (cellSize) {
-            CellSize.TINY -> 2.35f
+//            CellSize.TINY -> 2.35f
             CellSize.SMALL -> 2.5f
             CellSize.MEDIUM -> 2.85f
             CellSize.LARGE -> 3.3f
         }
         MazeType.RHOMBIC -> when (cellSize) {
-            CellSize.TINY -> 1.45f
+//            CellSize.TINY -> 1.45f
             CellSize.SMALL -> 1.65f
             CellSize.MEDIUM -> 2.0f
             CellSize.LARGE -> if (screenSize.first == 440f && screenSize.second == 956f ||
@@ -184,7 +188,7 @@ fun computeVerticalPadding(mazeType: MazeType, cellSize: CellSize, context: Cont
         MazeType.RHOMBIC -> 0f
     }
     val sizeRatio: Float = when (cellSize) {
-        CellSize.TINY -> 0.35f
+//        CellSize.TINY -> 0.35f
         CellSize.SMALL -> 0.30f
         CellSize.MEDIUM -> 0.25f
         CellSize.LARGE -> 0.20f
@@ -255,7 +259,7 @@ fun navigationMenuVerticalAdjustment(mazeType: MazeType, cellSize: CellSize, con
 
     // Adjust offset based on cell size
     val sizeAdjustment = when (cellSize) {
-        CellSize.TINY -> 0.8f
+//        CellSize.TINY -> 0.8f
         CellSize.SMALL -> 0.9f
         CellSize.MEDIUM -> 1.0f
         CellSize.LARGE -> 1.1f
@@ -263,14 +267,14 @@ fun navigationMenuVerticalAdjustment(mazeType: MazeType, cellSize: CellSize, con
 
     // Specific adjustments for RHOMBIC maze type
     val paddingMap: List<Quadruple<Pair<Float, Float>, MazeType, CellSize, Float>> = listOf(
-        Quadruple(Pair(375f, 812f), MazeType.RHOMBIC, CellSize.TINY, 8f),
-        Quadruple(Pair(390f, 844f), MazeType.RHOMBIC, CellSize.TINY, 6f),
-        Quadruple(Pair(393f, 852f), MazeType.RHOMBIC, CellSize.TINY, 5f),
-        Quadruple(Pair(402f, 874f), MazeType.RHOMBIC, CellSize.TINY, 4f),
-        Quadruple(Pair(414f, 896f), MazeType.RHOMBIC, CellSize.TINY, 2f),
-        Quadruple(Pair(428f, 926f), MazeType.RHOMBIC, CellSize.TINY, 0f),
-        Quadruple(Pair(430f, 932f), MazeType.RHOMBIC, CellSize.TINY, -2f),
-        Quadruple(Pair(440f, 956f), MazeType.RHOMBIC, CellSize.TINY, -4f),
+//        Quadruple(Pair(375f, 812f), MazeType.RHOMBIC, CellSize.TINY, 8f),
+//        Quadruple(Pair(390f, 844f), MazeType.RHOMBIC, CellSize.TINY, 6f),
+//        Quadruple(Pair(393f, 852f), MazeType.RHOMBIC, CellSize.TINY, 5f),
+//        Quadruple(Pair(402f, 874f), MazeType.RHOMBIC, CellSize.TINY, 4f),
+//        Quadruple(Pair(414f, 896f), MazeType.RHOMBIC, CellSize.TINY, 2f),
+//        Quadruple(Pair(428f, 926f), MazeType.RHOMBIC, CellSize.TINY, 0f),
+//        Quadruple(Pair(430f, 932f), MazeType.RHOMBIC, CellSize.TINY, -2f),
+//        Quadruple(Pair(440f, 956f), MazeType.RHOMBIC, CellSize.TINY, -4f),
         Quadruple(Pair(375f, 812f), MazeType.RHOMBIC, CellSize.SMALL, 8f),
         Quadruple(Pair(390f, 844f), MazeType.RHOMBIC, CellSize.SMALL, 6f),
         Quadruple(Pair(393f, 852f), MazeType.RHOMBIC, CellSize.SMALL, 5f),
