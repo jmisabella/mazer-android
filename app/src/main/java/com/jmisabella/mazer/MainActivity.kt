@@ -537,10 +537,10 @@ fun ContentScreen() {
 
 //        vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
         if (vibrator.hasAmplitudeControl()) {
-            vibrator.vibrate(VibrationEffect.createOneShot(200, 128))
+            vibrator.vibrate(VibrationEffect.createOneShot(100, 120))
         } else {
             // Fallback for devices without amplitude control
-            vibrator.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
         }
 
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_CONFIRM, 200)
@@ -589,10 +589,10 @@ fun ContentScreen() {
         if (newGridPtr == null || newGridPtr == 0L) return false
 
         if (vibrator.hasAmplitudeControl()) {
-            vibrator.vibrate(VibrationEffect.createOneShot(30, 128))  // 30ms at half strength
+            vibrator.vibrate(VibrationEffect.createOneShot(20, 132))
         } else {
             // Fallback for devices without amplitude control
-            vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
+            vibrator.vibrate(VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE))
         }
 
         currentGridState.value = newGridPtr
