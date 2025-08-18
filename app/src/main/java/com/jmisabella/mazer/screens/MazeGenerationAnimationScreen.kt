@@ -236,22 +236,6 @@ fun MazeGenerationAnimationScreen(
                                 optionalColor = optionalColor
                             )
                         }
-//                        MazeType.UPSILON -> {
-////                            val fitOctagon = availableHeightDp / rows.toFloat()
-////                            val octagon = min(cellSizes.octagon, fitOctagon)
-////                            val square = octagon / sqrt(2f).toFloat()
-//                            UpsilonMazeScreen(
-//                                cells = currentCells,
-//                                squareSize = cellSizes.square,
-//                                octagonSize = cellSizes.octagon,
-//                                showSolution = showSolution.value,
-//                                showHeatMap = showHeatMap.value,
-//                                selectedPalette = selectedPalette.value,
-//                                maxDistance = maxDistance,
-//                                defaultBackgroundColor = defaultBackground.value,
-//                                optionalColor = optionalColor
-//                            )
-//                        }
                         else -> Text("Unsupported maze type")
                     }
                 }
