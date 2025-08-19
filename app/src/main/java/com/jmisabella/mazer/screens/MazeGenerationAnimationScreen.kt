@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.platform.LocalConfiguration
 import com.jmisabella.mazer.layout.CellColors
 import com.jmisabella.mazer.layout.CellSizes
 import com.jmisabella.mazer.layout.computeCellSize
@@ -89,7 +90,7 @@ fun MazeGenerationAnimationScreen(
     fun completeAnimation() {
         isAnimatingGeneration.value = false
         mazeGenerated.value = true
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
+//        toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
         defaultBackground.value = randomDefaultExcluding(defaultBackground.value, CellColors.defaultBackgroundColors)
     }
 
@@ -175,7 +176,13 @@ fun MazeGenerationAnimationScreen(
 
                 val mazeContent = @Composable {
                     val maxDistance = currentCells.maxOfOrNull { it.distance } ?: 1
-                    val cellSizeValue = computeCellSize(currentCells, mazeType, cellSize, context)
+//                    val cellSizeValue = computeCellSize(currentCells, mazeType, cellSize, context)
+                    val configuration = LocalConfiguration.current
+                    val screenWidthDp = configuration.screenWidthDp.toFloat()
+                    val screenHeightDp = configuration.screenHeightDp.toFloat()
+                    val cols = (currentCells.maxOfOrNull { it.x } ?: 0) + 1
+                    val rows = (currentCells.maxOfOrNull { it.y } ?: 0) + 1
+                    var cellSizeValue = 0f
                     when (mazeType) {
                         MazeType.ORTHOGONAL -> OrthogonalMazeScreen(
                             selectedPalette = selectedPalette,
@@ -187,36 +194,52 @@ fun MazeGenerationAnimationScreen(
                             cellSize = cellSize
                         )
 
-                        MazeType.DELTA -> DeltaMazeScreen(
-                            cells = currentCells,
-                            cellSize = cellSizeValue,
-                            showSolution = showSolution.value,
-                            showHeatMap = showHeatMap.value,
-                            selectedPalette = selectedPalette.value,
-                            maxDistance = maxDistance,
-                            defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
-                        )
+                        MazeType.DELTA -> {
+                            val cellFromWidth = screenWidthDp * 2f / (cols + 1f)
+                            val cellFromHeight = availableHeightDp * 2f / sqrt(3f) / rows.toFloat()
+                            cellSizeValue = min(cellFromWidth, cellFromHeight)
+                            DeltaMazeScreen(
+                                cells = currentCells,
+                                cellSize = cellSizeValue,
+                                showSolution = showSolution.value,
+                                showHeatMap = showHeatMap.value,
+                                selectedPalette = selectedPalette.value,
+                                maxDistance = maxDistance,
+                                defaultBackgroundColor = defaultBackground.value,
+                                optionalColor = optionalColor
+                            )
+                        }
 
-                        MazeType.SIGMA -> SigmaMazeScreen(
-                            cells = currentCells,
-                            cellSize = cellSizeValue,
-                            showSolution = showSolution.value,
-                            showHeatMap = showHeatMap.value,
-                            selectedPalette = selectedPalette.value,
-                            defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
-                        )
+                        MazeType.SIGMA -> {
+                            val cellFromWidth = screenWidthDp / (1.5f * cols + 0.5f)
+                            val cellFromHeight = availableHeightDp / (sqrt(3f) * (rows.toFloat() + 0.5f))
+                            cellSizeValue = min(cellFromWidth, cellFromHeight)
+                            SigmaMazeScreen(
+                                cells = currentCells,
+                                cellSize = cellSizeValue,
+                                showSolution = showSolution.value,
+                                showHeatMap = showHeatMap.value,
+                                selectedPalette = selectedPalette.value,
+                                defaultBackgroundColor = defaultBackground.value,
+                                optionalColor = optionalColor
+                            )
+                        }
 
-                        MazeType.RHOMBIC -> RhombicMazeScreen(
-                            selectedPalette = selectedPalette,
-                            cells = currentCells,
-                            cellSize = cellSizeValue,
-                            showSolution = showSolution.value,
-                            showHeatMap = showHeatMap.value,
-                            defaultBackgroundColor = defaultBackground.value,
-                            optionalColor = optionalColor
-                        )
+                        MazeType.RHOMBIC -> {
+                            val halfDiag = 1f / sqrt(2f)
+                            val cellFromWidth = screenWidthDp / (halfDiag * cols.toFloat() + sqrt(2f))
+                            val cellFromHeight = availableHeightDp / (halfDiag * rows.toFloat() + sqrt(2f))
+                            cellSizeValue = min(cellFromWidth, cellFromHeight)
+                            RhombicMazeScreen(
+                                selectedPalette = selectedPalette,
+                                cells = currentCells,
+                                cellSize = cellSizeValue,
+                                showSolution = showSolution.value,
+                                showHeatMap = showHeatMap.value,
+                                defaultBackgroundColor = defaultBackground.value,
+                                optionalColor = optionalColor
+                            )
+                        }
                         MazeType.UPSILON -> {
                             val c = sqrt(2f) - 1f
                             val f = (1f - c) / 2f
