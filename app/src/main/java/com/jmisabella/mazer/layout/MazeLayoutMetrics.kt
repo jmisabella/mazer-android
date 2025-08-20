@@ -54,7 +54,7 @@ fun adjustedCellSize(mazeType: MazeType, cellSize: CellSize, context: Context): 
     return adjustment * rawSize
 }
 
-fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: CellSize, context: Context): Float {
+fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: CellSize, context: Context, availableHeightDp: Float? = null): Float {
     val cols = (mazeCells.maxOfOrNull { it.x } ?: 0) + 1
     val rows = (mazeCells.maxOfOrNull { it.y } ?: 0) + 1
     val displayMetrics = context.resources.displayMetrics
@@ -81,33 +81,39 @@ fun computeCellSize(mazeCells: List<MazeCell>, mazeType: MazeType, cellSize: Cel
     val estimatedBottomPadding = 20f  // NEW: Account for explicit bottom padding in Compose layout
 
     val overhead = statusBarHeightDp + menuVerticalAdj + estimatedRowHeight + navBarHeightDp + estimatedBottomPadding
-    val availableHeightDp = screenHeightDp - overhead
+    val effectiveAvailableHeightDp = availableHeightDp ?: (screenHeightDp - overhead)
 
     return when (mazeType) {
+//        MazeType.ORTHOGONAL -> {
+//            val cellFromHeight = (effectiveAvailableHeightDp - 8f) / rows.toFloat()  // NEW: Subtract approx border height (strokeWidth ~4dp top/bottom)
+//            val cellFromWidth = screenWidthDp / cols.toFloat()
+//            min(cellFromWidth, cellFromHeight)
+//        }
         MazeType.ORTHOGONAL -> {
-            val cellFromHeight = (availableHeightDp - 8f) / rows.toFloat()  // NEW: Subtract approx border height (strokeWidth ~4dp top/bottom)
+            val cellFromHeight = (effectiveAvailableHeightDp - 8f) / rows.toFloat()  // NEW: Subtract approx border height (strokeWidth ~4dp top/bottom)
             val cellFromWidth = screenWidthDp / cols.toFloat()
-            min(cellFromWidth, cellFromHeight)
+//            min(min(cellFromWidth, cellFromHeight), adjustedCellSize(mazeType, cellSize, context))
+            min(min(cellFromWidth, cellFromHeight), adjustedCellSize(mazeType, cellSize, context))
         }
         MazeType.DELTA -> {
             val cellFromWidth = screenWidthDp * 2f / (cols + 1f)
-            val cellFromHeight = availableHeightDp * 2f / sqrt(3f) / rows.toFloat()
+            val cellFromHeight = effectiveAvailableHeightDp * 2f / sqrt(3f) / rows.toFloat()
             min(cellFromWidth, cellFromHeight)
         }
         MazeType.SIGMA -> {
             val cellFromWidth = screenWidthDp / (1.5f * cols + 0.5f)
-            val cellFromHeight = availableHeightDp / (sqrt(3f) * (rows.toFloat() + 0.5f))
+            val cellFromHeight = effectiveAvailableHeightDp / (sqrt(3f) * (rows.toFloat() + 0.5f))
             min(cellFromWidth, cellFromHeight)
         }
         MazeType.UPSILON -> {
             val cellFromWidth = screenWidthDp / cols.toFloat()
-            val cellFromHeight = availableHeightDp / rows.toFloat()
+            val cellFromHeight = effectiveAvailableHeightDp / rows.toFloat()
             min(cellFromWidth, cellFromHeight)
         }
         MazeType.RHOMBIC -> {
             val halfDiag = 1f / sqrt(2f)
             val cellFromWidth = screenWidthDp / (halfDiag * cols.toFloat() + sqrt(2f))
-            val cellFromHeight = availableHeightDp / (halfDiag * rows.toFloat() + sqrt(2f))
+            val cellFromHeight = effectiveAvailableHeightDp / (halfDiag * rows.toFloat() + sqrt(2f))
             min(cellFromWidth, cellFromHeight)
         }
     }

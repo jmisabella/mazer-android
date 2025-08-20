@@ -45,7 +45,8 @@ fun OrthogonalMazeScreen(
     showHeatMap: Boolean,
     defaultBackgroundColor: Color,
     optionalColor: Color?,
-    cellSize: CellSize
+    cellSize: CellSize,
+    availableHeightDp: Float? = null
 ) {
     val context = LocalContext.current
     val columns = (cells.maxOfOrNull { it.x } ?: 0) + 1
@@ -54,8 +55,9 @@ fun OrthogonalMazeScreen(
     val totalRows = rows
 
     // Compute cell size
-//    val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, CellSize.MEDIUM, context).dp
-    val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, cellSize, context).dp
+////    val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, CellSize.MEDIUM, context).dp
+//    val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, cellSize, context).dp
+    val cellSize = computeCellSize(cells, MazeType.ORTHOGONAL, cellSize, context, availableHeightDp).dp
     val strokeWidth = when (cellSize.value) {
         in 0f..20f -> 2.dp
         in 20f..40f -> 3.dp
