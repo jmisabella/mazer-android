@@ -199,13 +199,11 @@ fun MazeRenderScreen(
             ) {
                 val mazeContent = @Composable {
                     val maxDistance = mazeCells.maxOfOrNull { it.distance } ?: 1
-//                    val cellSizeValue = computeCellSize(mazeCells, mazeType, cellSize, context)
                     val configuration = LocalConfiguration.current
                     val screenWidthDp = configuration.screenWidthDp.toFloat()
                     val screenHeightDp = configuration.screenHeightDp.toFloat()
                     val cols = (mazeCells.maxOfOrNull { it.x } ?: 0) + 1
                     val rows = (mazeCells.maxOfOrNull { it.y } ?: 0) + 1
-                    var cellSizeValue = 0f
                     when (mazeType) {
                         MazeType.ORTHOGONAL -> OrthogonalMazeScreen(
                             selectedPalette = selectedPalette,
@@ -214,12 +212,11 @@ fun MazeRenderScreen(
                             showHeatMap = showHeatMap.value,
                             defaultBackgroundColor = defaultBackground.value,
                             optionalColor = optionalColor,
-                            cellSize = cellSize
+                            cellSize = cellSize,
+                            availableHeightDp = availableHeightDp
                         )
                         MazeType.DELTA -> {
-                            val cellFromWidth = screenWidthDp * 2f / (cols + 1f)
-                            val cellFromHeight = availableHeightDp * 2f / sqrt(3f) / rows.toFloat()
-                            cellSizeValue = min(cellFromWidth, cellFromHeight)
+                            val cellSizeValue = computeCellSize(mazeCells, mazeType, cellSize, context, availableHeightDp)
                             DeltaMazeScreen(
                                 cells = mazeCells,
                                 cellSize = cellSizeValue,
@@ -232,9 +229,7 @@ fun MazeRenderScreen(
                             )
                         }
                         MazeType.SIGMA -> {
-                            val cellFromWidth = screenWidthDp / (1.5f * cols + 0.5f)
-                            val cellFromHeight = availableHeightDp / (sqrt(3f) * (rows.toFloat() + 0.5f))
-                            cellSizeValue = min(cellFromWidth, cellFromHeight)
+                            val cellSizeValue = computeCellSize(mazeCells, mazeType, cellSize, context, availableHeightDp)
                             SigmaMazeScreen(
                                 cells = mazeCells,
                                 cellSize = cellSizeValue,
@@ -246,10 +241,7 @@ fun MazeRenderScreen(
                             )
                         }
                         MazeType.RHOMBIC -> {
-                            val halfDiag = 1f / sqrt(2f)
-                            val cellFromWidth = screenWidthDp / (halfDiag * cols.toFloat() + sqrt(2f))
-                            val cellFromHeight = availableHeightDp / (halfDiag * rows.toFloat() + sqrt(2f))
-                            cellSizeValue = min(cellFromWidth, cellFromHeight)
+                            val cellSizeValue = computeCellSize(mazeCells, mazeType, cellSize, context, availableHeightDp)
                             RhombicMazeScreen(
                                 selectedPalette = selectedPalette,
                                 cells = mazeCells,
