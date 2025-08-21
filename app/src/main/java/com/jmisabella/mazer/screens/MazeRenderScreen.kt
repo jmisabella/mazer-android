@@ -206,7 +206,7 @@ fun MazeRenderScreen(
                     val rows = (mazeCells.maxOfOrNull { it.y } ?: 0) + 1
                     when (mazeType) {
                         MazeType.ORTHOGONAL -> OrthogonalMazeScreen(
-                            selectedPalette = selectedPalette,
+                            selectedPalette = selectedPalette.value,
                             cells = mazeCells,
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,

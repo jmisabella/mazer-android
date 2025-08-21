@@ -25,9 +25,9 @@ fun adjustedCellSize(mazeType: MazeType, cellSize: CellSize, context: Context): 
             CellSize.LARGE -> 1.8f
         }
         MazeType.SIGMA -> when (cellSize) {
-            CellSize.SMALL -> 0.7f
-            CellSize.MEDIUM -> 0.8f
-            CellSize.LARGE -> 0.9f
+            CellSize.SMALL -> 0.65f
+            CellSize.MEDIUM -> 0.75f
+            CellSize.LARGE -> 0.8f
         }
         MazeType.UPSILON -> when (cellSize) {
             CellSize.SMALL -> 2.5f
