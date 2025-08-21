@@ -200,7 +200,7 @@ fun MazeGenerationAnimationScreen(
                                 showSolution = showSolution.value,
                                 showHeatMap = showHeatMap.value,
                                 selectedPalette = selectedPalette.value,
-                                maxDistance = maxDistance,
+//                                maxDistance = maxDistance,
                                 defaultBackgroundColor = defaultBackground.value,
                                 optionalColor = optionalColor
                             )

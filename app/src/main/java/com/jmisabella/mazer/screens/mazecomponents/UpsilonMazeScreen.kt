@@ -38,6 +38,8 @@ import com.jmisabella.mazer.layout.cellBackgroundColor
 import com.jmisabella.mazer.models.Coordinates
 import com.jmisabella.mazer.models.HeatMapPalette
 import com.jmisabella.mazer.models.MazeCell
+import com.jmisabella.mazer.layout.wallStrokeWidth
+import com.jmisabella.mazer.models.MazeType
 import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
@@ -113,7 +115,8 @@ fun UpsilonMazeScreen(
     val spacingDp = (octagonSize + squareSize) / 2f
     val spacingPx = spacingDp * density
     val overlapPx = 2f  // Fixed pixel overlap to cover gaps reliably
-    val strokePx = octagonPx / 16f  // Increased divisor for thinner walls on large cells
+//    val strokePx = octagonPx / 16f  // Increased divisor for thinner walls on large cells
+    val strokePx = wallStrokeWidth(MazeType.UPSILON, octagonSize, density)
 
     val sortedCells = remember(cells) { cells.sortedBy { it.y * columns + it.x } }
 
