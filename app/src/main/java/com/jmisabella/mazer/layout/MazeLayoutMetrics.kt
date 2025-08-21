@@ -15,9 +15,12 @@ fun adjustedCellSize(mazeType: MazeType, cellSize: CellSize, context: Context): 
     val screenSize = screenWidthDp to screenHeightDp
     val adjustment: Float = when (mazeType) {
         MazeType.DELTA -> when (cellSize) {
-            CellSize.SMALL -> 1.85f
-            CellSize.MEDIUM -> 2.2f
-            CellSize.LARGE -> 2.5f
+//            CellSize.SMALL -> 1.85f
+//            CellSize.MEDIUM -> 2.2f
+//            CellSize.LARGE -> 2.5f
+            CellSize.SMALL -> 1.7f
+            CellSize.MEDIUM -> 1.9f
+            CellSize.LARGE -> 2.2f
         }
         MazeType.ORTHOGONAL -> when (cellSize) {
             CellSize.SMALL -> 1.3f

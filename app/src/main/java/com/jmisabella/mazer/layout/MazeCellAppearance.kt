@@ -35,7 +35,8 @@ fun wallStrokeWidth(mazeType: MazeType, cellSize: Float, density: Float): Float 
         MazeType.ORTHOGONAL -> if (cellSize >= 18f) 6f else 4.5f
         MazeType.SIGMA -> if (cellSize >= 18f) 1.8f else 1.6f
         MazeType.UPSILON -> if (cellSize >= 28f) 4f else 6f
-        MazeType.RHOMBIC -> if (cellSize >= 28f) 2.25f else 2.8f
+//        MazeType.RHOMBIC -> if (cellSize >= 28f) 2.25f else 2.8f
+        MazeType.RHOMBIC -> if (cellSize >= 28f) 2.25f else 2.10f
     }
 
     val raw = cellSize / denominator

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.jmisabella.mazer.layout.CellColors
 import com.jmisabella.mazer.layout.cellBackgroundColor
 import com.jmisabella.mazer.layout.computeCellSize
+import com.jmisabella.mazer.layout.wallStrokeWidth
 import com.jmisabella.mazer.models.CellSize
 import com.jmisabella.mazer.models.HeatMapPalette
 import com.jmisabella.mazer.models.MazeCell
@@ -57,11 +58,8 @@ fun OrthogonalMazeScreen(
     val totalRows = rows
 
     val cellSizeDp = computeCellSize(cells, MazeType.ORTHOGONAL, cellSize, context, availableHeightDp).dp
-    val strokeWidth = when (cellSizeDp.value) {
-        in 0f..20f -> 2.dp
-        in 20f..40f -> 3.dp
-        else -> 4.dp
-    }
+    val strokeWidth = wallStrokeWidth(MazeType.ORTHOGONAL, cellSizeDp.value, LocalDensity.current.density).dp
+
     val borderWidth = strokeWidth
     val totalPadding = strokeWidth * 2
 
