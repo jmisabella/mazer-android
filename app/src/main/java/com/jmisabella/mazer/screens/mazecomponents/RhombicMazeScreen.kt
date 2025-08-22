@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalContext
@@ -114,6 +115,8 @@ fun RhombicMazeScreen(
     val diagonalPx = remember(diagonal) { with(density) { diagonal.dp.toPx() } }
     val strokeWidth = remember(cellSize) { wallStrokeWidth(MazeType.RHOMBIC, cellSize, density.density) }
 
+    val overlapPx = strokeWidth * (sqrt(2f) / 2f)  // ≈ 0.707 * strokeWidth
+
     val scaledPoints = remember(halfDiagonalPx, diagonalPx) {
         listOf(
             Offset(halfDiagonalPx, 0f), // top
@@ -123,10 +126,19 @@ fun RhombicMazeScreen(
         )
     }
 
-    val relativeFillPath = remember(scaledPoints) {
+    val adjustedPoints = remember(scaledPoints, overlapPx) {
+        listOf(
+            Offset(scaledPoints[0].x, scaledPoints[0].y - overlapPx),
+            Offset(scaledPoints[1].x + overlapPx, scaledPoints[1].y),
+            Offset(scaledPoints[2].x, scaledPoints[2].y + overlapPx),
+            Offset(scaledPoints[3].x - overlapPx, scaledPoints[3].y)
+        )
+    }
+
+    val relativeFillPath = remember(adjustedPoints) {
         Path().apply {
-            moveTo(scaledPoints[0].x, scaledPoints[0].y)
-            scaledPoints.drop(1).forEach { lineTo(it.x, it.y) }
+            moveTo(adjustedPoints[0].x, adjustedPoints[0].y)
+            adjustedPoints.drop(1).forEach { lineTo(it.x, it.y) }
             close()
         }
     }
@@ -144,20 +156,22 @@ fun RhombicMazeScreen(
         cells.map { cell ->
             val strokePath = Path()
             dirMap.forEach { (dir, info) ->
-                val linked = cell.linked.contains(dir)
+                if (cell.linked.contains(dir)) return@forEach
+
                 val (dq, dr) = info.offsetDelta
                 val neighborCoord = Coordinates(cell.x + dq, cell.y + dr)
-                val neighbor = cellMap[neighborCoord] ?: return@forEach
+                val neighbor = cellMap[neighborCoord]
 
-                if (cell.onSolutionPath && neighbor.onSolutionPath && abs(cell.distance - neighbor.distance) == 1) return@forEach
+                val neighborLink = neighbor?.linked?.contains(info.opposite) ?: false
+                if (neighborLink) return@forEach
 
-                val neighborLink = neighbor.linked.contains(info.opposite)
+                if (neighbor != null && cell.onSolutionPath && neighbor.onSolutionPath && abs(cell.distance - neighbor.distance) == 1) return@forEach
 
-                if (!linked && !neighborLink) {
-                    val (i, j) = info.vertexIndices
-                    strokePath.moveTo(scaledPoints[i].x, scaledPoints[i].y)
-                    strokePath.lineTo(scaledPoints[j].x, scaledPoints[j].y)
-                }
+                val (i, j) = info.vertexIndices
+                val start = scaledPoints[i]
+                val end = scaledPoints[j]
+                strokePath.moveTo(start.x, start.y)
+                strokePath.lineTo(end.x, end.y)
             }
             strokePath
         }
@@ -189,7 +203,7 @@ fun RhombicMazeScreen(
                     translate(offsetXPx, offsetYPx)
                 }) {
                     drawPath(relativeFillPath, color = fillColor)
-                    drawPath(strokePaths[index], color = Color.Black, style = Stroke(width = strokeWidth))
+                    drawPath(strokePaths[index], color = Color.Black, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
                 }
             }
         }
@@ -203,10 +217,9 @@ fun RhombicMazeScreen(
 //import android.media.ToneGenerator
 //import android.os.VibrationEffect
 //import android.os.Vibrator
-//import androidx.compose.foundation.background
+//import androidx.compose.foundation.Canvas
 //import androidx.compose.foundation.layout.Box
 //import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.foundation.layout.offset
 //import androidx.compose.foundation.layout.size
 //import androidx.compose.runtime.Composable
 //import androidx.compose.runtime.DisposableEffect
@@ -214,23 +227,29 @@ fun RhombicMazeScreen(
 //import androidx.compose.runtime.MutableState
 //import androidx.compose.runtime.mutableStateMapOf
 //import androidx.compose.runtime.remember
-//import androidx.compose.runtime.rememberCoroutineScope
-//import androidx.compose.ui.Alignment
 //import androidx.compose.ui.Modifier
 //import androidx.compose.ui.geometry.Offset
 //import androidx.compose.ui.graphics.Color
+//import androidx.compose.ui.graphics.Path
+//import androidx.compose.ui.graphics.StrokeCap
+//import androidx.compose.ui.graphics.drawscope.Stroke
+//import androidx.compose.ui.graphics.drawscope.withTransform
 //import androidx.compose.ui.platform.LocalContext
 //import androidx.compose.ui.platform.LocalDensity
 //import androidx.compose.ui.unit.dp
 //import com.jmisabella.mazer.layout.cellBackgroundColor
+//import com.jmisabella.mazer.layout.wallStrokeWidth
 //import com.jmisabella.mazer.models.Coordinates
 //import com.jmisabella.mazer.models.HeatMapPalette
 //import com.jmisabella.mazer.models.MazeCell
+//import com.jmisabella.mazer.models.MazeType
 //import kotlinx.coroutines.delay
-//import kotlinx.coroutines.launch
+//import kotlin.math.abs
 //import kotlin.math.max
 //import kotlin.math.min
 //import kotlin.math.sqrt
+//
+//data class DirInfo(val vertexIndices: Pair<Int, Int>, val offsetDelta: Pair<Int, Int>, val opposite: String)
 //
 //@Composable
 //fun RhombicMazeScreen(
@@ -255,10 +274,9 @@ fun RhombicMazeScreen(
 //    val containerWidth = halfDiagonal * maxX + diagonal
 //    val containerHeight = halfDiagonal * maxY + diagonal
 //
-//    val cellMap: Map<Coordinates, MazeCell> = cells.associateBy { Coordinates(it.x, it.y) }
+//    val cellMap = cells.associateBy { Coordinates(it.x, it.y) }
 //    val revealedSolutionPath = remember { mutableStateMapOf<Coordinates, Boolean>() }
-//    val coroutineScope = rememberCoroutineScope()
-//    val vibrator = remember { context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
+//    val vibrator = remember { context.getSystemService(Vibrator::class.java) }
 //    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
 //
 //    DisposableEffect(Unit) {
@@ -293,8 +311,7 @@ fun RhombicMazeScreen(
 //
 //                val currentTime = System.currentTimeMillis()
 //                if (currentTime - lastFeedbackTime >= minFeedbackInterval) {
-////                    toneGenerator.startTone(ToneGenerator.TONE_PROP_PROMPT, 200)
-//                    vibrator.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
+//                    vibrator?.vibrate(VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE))
 //                    lastFeedbackTime = currentTime
 //                }
 //                index += batchSize
@@ -304,31 +321,122 @@ fun RhombicMazeScreen(
 //        }
 //    }
 //
+//    val density = LocalDensity.current
+//
+//    val halfDiagonalPx = remember(halfDiagonal) { with(density) { halfDiagonal.dp.toPx() } }
+//    val diagonalPx = remember(diagonal) { with(density) { diagonal.dp.toPx() } }
+//    val strokeWidth = remember(cellSize) { wallStrokeWidth(MazeType.RHOMBIC, cellSize, density.density) }
+//
+//    val overlapPx = strokeWidth * (sqrt(2f) / 2f)  // ≈ 0.707 * strokeWidth
+////    val extensionLengthPx = strokeWidth / 2f
+//    val extensionLengthPx = strokeWidth * (sqrt(2f) / 2f)
+//
+//    val scaledPoints = remember(halfDiagonalPx, diagonalPx) {
+//        listOf(
+//            Offset(halfDiagonalPx, 0f), // top
+//            Offset(diagonalPx, halfDiagonalPx), // right
+//            Offset(halfDiagonalPx, diagonalPx), // bottom
+//            Offset(0f, halfDiagonalPx) // left
+//        )
+//    }
+//
+//    val adjustedPoints = remember(scaledPoints, overlapPx) {
+//        listOf(
+//            Offset(scaledPoints[0].x, scaledPoints[0].y - overlapPx),
+//            Offset(scaledPoints[1].x + overlapPx, scaledPoints[1].y),
+//            Offset(scaledPoints[2].x, scaledPoints[2].y + overlapPx),
+//            Offset(scaledPoints[3].x - overlapPx, scaledPoints[3].y)
+//        )
+//    }
+//
+//    val relativeFillPath = remember(adjustedPoints) {
+//        Path().apply {
+//            moveTo(adjustedPoints[0].x, adjustedPoints[0].y)
+//            adjustedPoints.drop(1).forEach { lineTo(it.x, it.y) }
+//            close()
+//        }
+//    }
+//
+//    val dirMap = remember {
+//        mapOf(
+//            "UpperRight" to DirInfo(0 to 1, 1 to -1, "LowerLeft"),
+//            "LowerRight" to DirInfo(1 to 2, 1 to 1, "UpperLeft"),
+//            "LowerLeft" to DirInfo(2 to 3, -1 to 1, "UpperRight"),
+//            "UpperLeft" to DirInfo(3 to 0, -1 to -1, "LowerRight")
+//        )
+//    }
+//
+//    val strokePaths = remember(cells, scaledPoints, dirMap) {
+//        cells.map { cell ->
+//            val strokePath = Path()
+//            dirMap.forEach { (dir, info) ->
+//                if (cell.linked.contains(dir)) return@forEach
+//
+//                val (dq, dr) = info.offsetDelta
+//                val neighborCoord = Coordinates(cell.x + dq, cell.y + dr)
+//                val neighbor = cellMap[neighborCoord]
+//
+//                val neighborLink = neighbor?.linked?.contains(info.opposite) ?: false
+//                if (neighborLink) return@forEach
+//
+//                if (neighbor != null && cell.onSolutionPath && neighbor.onSolutionPath && abs(cell.distance - neighbor.distance) == 1) return@forEach
+//
+//                val (i, j) = info.vertexIndices
+//                val start = scaledPoints[i]
+//                val end = scaledPoints[j]
+//                val (newStart, newEnd) = extendLine(start, end, extensionLengthPx)
+//                strokePath.moveTo(newStart.x, newStart.y)
+//                strokePath.lineTo(newEnd.x, newEnd.y)
+//            }
+//            strokePath
+//        }
+//    }
+//
 //    Box(
-//        modifier = Modifier.fillMaxSize(),
-//        contentAlignment = Alignment.Center
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .size(containerWidth.dp, containerHeight.dp)
 //    ) {
-//        Box(
-//            modifier = Modifier
-//                .size(containerWidth.dp, containerHeight.dp)
-//                .background(Color.Transparent)
-//        ) {
-//            cells.forEach { cell ->
-//                val coord = Coordinates(cell.x, cell.y)
-//                RhombicCellScreen(
+//        Canvas(modifier = Modifier.fillMaxSize()) {
+//            cells.forEachIndexed { index, cell ->
+//                val offsetXPx = cell.x * halfDiagonalPx
+//                val offsetYPx = cell.y * halfDiagonalPx
+//
+//                val fillColor = cellBackgroundColor(
 //                    cell = cell,
-//                    cellSize = cellSize.dp,
 //                    showSolution = showSolution,
 //                    showHeatMap = showHeatMap,
-//                    selectedPalette = selectedPalette.value,
 //                    maxDistance = maxDistance,
-//                    isRevealedSolution = revealedSolutionPath[coord] ?: false,
-//                    defaultBackgroundColor = defaultBackgroundColor,
-//                    optionalColor = optionalColor,
+//                    selectedPalette = selectedPalette.value,
+//                    isRevealedSolution = revealedSolutionPath[Coordinates(cell.x, cell.y)] ?: false,
+//                    defaultBackground = defaultBackgroundColor,
 //                    totalRows = totalRows,
-//                    modifier = Modifier.offset((cell.x * halfDiagonal).dp, (cell.y * halfDiagonal).dp)
+//                    optionalColor = optionalColor
 //                )
+//
+//                withTransform({
+//                    translate(offsetXPx, offsetYPx)
+//                }) {
+//                    drawPath(relativeFillPath, color = fillColor)
+//                    drawPath(strokePaths[index], color = Color.Black, style = Stroke(width = strokeWidth, cap = StrokeCap.Butt))
+//                }
 //            }
 //        }
 //    }
 //}
+//
+//fun extendLine(start: Offset, end: Offset, extension: Float): Pair<Offset, Offset> {
+//    val dx = end.x - start.x
+//    val dy = end.y - start.y
+//    val length = sqrt(dx * dx + dy * dy)
+//    if (length == 0f) return Pair(start, end)
+//    val unitDx = dx / length
+//    val unitDy = dy / length
+//    val extDx = unitDx * extension
+//    val extDy = unitDy * extension
+//    return Pair(
+//        Offset(start.x - extDx, start.y - extDy),
+//        Offset(end.x + extDx, end.y + extDy)
+//    )
+//}
+
