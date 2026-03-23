@@ -1,6 +1,85 @@
-# mazer-android
-Android app using the `mazer` Rust library for generating and solving mazes.
+# MazeR for Android
 
+A fully offline, free Android maze app powered by the [MazeR](https://github.com/jmisabella/mazer) Rust library. Generate, explore, and solve mazes across **13 algorithms** and **5 grid types** — with heat-map hints, solution reveal, and step-by-step generation animation.
+
+---
+
+## Features
+
+### Maze Generation & Solving
+- **13 maze algorithms** — from classic Recursive Backtracker to graph-based Kruskal's and Prim's
+- **5 grid types** — square, triangular, hexagonal, diamond, and octagon grids
+- **Interactive solving** — navigate from start to goal using directional controls with haptic and audio feedback
+- **Fully offline** — all maze generation and solving runs locally via Rust FFI; no network required
+
+### Visualization
+- **Heat-map hints** — 20 color palettes with 10-shade gradients show distance from start, helping you gauge how close you are to the goal
+- **Solution reveal** — toggle the optimal path overlay at any time
+- **Generation animation** — watch the maze carve itself step-by-step to understand how each algorithm works
+- **Celebration effect** — sparkle particles, vibration, and a confirmation tone when you reach the goal
+
+### Customization
+- **3 cell sizes** — Small, Medium, Large
+- **Dark and Light themes**
+- **Preference persistence** — your last selected algorithm, grid type, size, and heat-map setting are remembered between sessions
+
+---
+
+## Maze Algorithms
+
+| Algorithm | Description |
+|---|---|
+| **Aldous-Broder** | Random walk producing unbiased, uniformly random mazes |
+| **Binary Tree** | Fast generation with a north/east directional bias |
+| **Eller's** | Row-by-row generation, memory-efficient for very large mazes |
+| **Growing Tree (Newest)** | Active cell list with newest selection; behaves like Recursive Backtracker |
+| **Growing Tree (Random)** | Active cell list with random selection for more varied layouts |
+| **Hunt and Kill** | Random walks combined with systematic scanning |
+| **Kruskal's** | Minimum spanning tree approach producing uniform structures |
+| **Prim's** | Weighted cell growth for moderate-length passages |
+| **Recursive Backtracker** | Depth-first search creating long, twisting corridors |
+| **Recursive Division** | Top-down subdivision from an open grid; fewer dead ends |
+| **Reverse Delete** | Loop-erased generation starting from an open grid |
+| **Sidewinder** | Row-wise generation with horizontal bias and random vertical links |
+| **Wilson's** | Loop-erased random walks producing uniformly random spanning trees |
+
+> Not all algorithms are available for every grid type. For example, Binary Tree and Sidewinder are only available for orthogonal mazes.
+
+---
+
+## Grid Types
+
+| Grid | Cells | Description |
+|---|---|---|
+| **Orthogonal** | Squares | Classic grid with straight paths and right-angle turns |
+| **Delta** | Triangles | Alternating normal and inverted triangles for jagged, complex paths |
+| **Sigma** | Hexagons | Six-directional navigation in a honeycomb pattern |
+| **Rhombic** | Diamonds | Slanted, diamond-shaped cells forming diagonal paths |
+| **Upsilon** | Octagons + Squares | Alternating shapes for diverse passage widths |
+
+---
+
+## Architecture
+
+```
+Rust (MazeR library)
+  |
+  | FFI (C ABI)
+  v
+JNI Wrapper (C)          -- app/src/main/cpp/
+  |
+  v
+Kotlin Native Bindings   -- MazerNative.kt
+  |
+  v
+Jetpack Compose UI        -- Screens, Canvas renderers, controls
+```
+
+- **UI** — Jetpack Compose with Material 3
+- **Rendering** — Custom `Canvas` composables for each grid topology with geometry-specific drawing
+- **State** — Compose `mutableStateOf` with coroutine-based background generation on `Dispatchers.IO`
+- **Native** — Prebuilt Rust `libmazer.so` linked via CMake; JNI wrapper marshals data between Kotlin and C
+- **Min SDK** — 24 &nbsp;|&nbsp; **Target SDK** — 36
 
 ---
 
@@ -62,7 +141,7 @@ Android app using the `mazer` Rust library for generating and solving mazes.
            external fun mazerFfiIntegrationTest(): Int
        }
        ```
-    2. Copy `mazer.h` from the project root to `app/src/main/cpp/mazer.h` for reference when writing JNI bindings. 
+    2. Copy `mazer.h` from the project root to `app/src/main/cpp/mazer.h` for reference when writing JNI bindings.
     3. Create a JNI wrapper in `app/src/main/cpp/mazer_jni.c`:
        ```c
        #include <jni.h>
@@ -117,3 +196,9 @@ Android app using the `mazer` Rust library for generating and solving mazes.
        ```
        FFI integration test passed ✅
        ```
+
+---
+
+## License
+
+This project uses the [MazeR](https://github.com/jmisabella/mazer) Rust library for maze generation and solving.

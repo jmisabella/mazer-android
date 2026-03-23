@@ -12,14 +12,14 @@ android {
 
     defaultConfig {
         applicationId = "com.jmisabella.mazer"
-        minSdk = 35
+        minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "1.2"
 
         ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64") // DEVELOP
-            // abiFilters += listOf("armeabi-v7a", "arm64-v8a") // RELEASE
+//            abiFilters += listOf("arm64-v8a", "x86_64") // DEVELOP
+             abiFilters += listOf("armeabi-v7a", "arm64-v8a") // RELEASE
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

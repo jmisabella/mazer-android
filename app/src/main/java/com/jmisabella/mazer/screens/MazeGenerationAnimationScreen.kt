@@ -183,7 +183,7 @@ fun MazeGenerationAnimationScreen(
                     val rows = (currentCells.maxOfOrNull { it.y } ?: 0) + 1
                     when (mazeType) {
                         MazeType.ORTHOGONAL -> OrthogonalMazeScreen(
-                            selectedPalette = selectedPalette,
+                            selectedPalette = selectedPalette.value,
                             cells = currentCells,
                             showSolution = showSolution.value,
                             showHeatMap = showHeatMap.value,
@@ -200,7 +200,7 @@ fun MazeGenerationAnimationScreen(
                                 showSolution = showSolution.value,
                                 showHeatMap = showHeatMap.value,
                                 selectedPalette = selectedPalette.value,
-                                maxDistance = maxDistance,
+//                                maxDistance = maxDistance,
                                 defaultBackgroundColor = defaultBackground.value,
                                 optionalColor = optionalColor
                             )
